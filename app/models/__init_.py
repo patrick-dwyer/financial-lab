@@ -27,6 +27,21 @@ class Mortgage:
         '''
         self.purchase_price = purchase_price
         self.min_down_payment = self._calculate_min_down_payment()
+        self.down_payment = self.min_down_payment
+
+    @property
+    def down_payment(self):
+        '''Getter: Returns the value when you call variable.down_payment'''
+        return self._down_payment
+    
+    @down_payment.setter
+    def down_payment(self, value: float):
+        '''Setter: runs logic when you try to change this value'''
+        if value < self.min_down_payment:
+            raise ValueError(f"Down payment {value} is below the legal minimum of {self.min_down_payment}")
+        
+        self._down_payment = value
+        
 
     def _calculate_min_down_payment(self) -> float:
         '''Internal helper to calculate minimum down payment based on purchase price.'''
@@ -43,6 +58,18 @@ class Mortgage:
         amount_over_500k = (self.purchase_price - Mortgage.min_down_payment_cutoff_1) * Mortgage.min_down_payment_percent_2
         amount_under_500k = Mortgage.min_down_payment_cutoff_1 * Mortgage.min_down_payment_percent_1
         return amount_over_500k + amount_under_500k
+    
+    def _calculate_mortgage_insurance(self) -> float:
+        return None
+
+
 
 my_mortgage = Mortgage(650000)
 print(f"Purchase price: {my_mortgage.purchase_price}, Min down payment: {my_mortgage.min_down_payment}")
+my_mortgage.down_payment = 25000
+print(my_mortgage.down_payment)
+
+# m = Mortgage(600000)
+# print(m.down_payment)
+# m.down_payment=750000
+# m.down_payment=100
