@@ -2,10 +2,10 @@ class Mortgage:
     '''
     Represents a mortgage that the user creates.
 
-    This class manages the basic calculations for:
-        - Miniumum down payment required
-        - Mortgage insurance
-        - Principal final
+    This class determines:
+        - miniumum down payment required
+        - mortgage insurance
+        - principal final (uninsured and insured)
 
     Class variables include:
         - min_down_payment_cutoff_1: minimum amount before second down payment percent is applied (500,000 CAD)
