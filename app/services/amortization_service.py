@@ -29,11 +29,9 @@ class AmortizationService:
     def __init__(self, principal_start: float, interest_rate: float, payment_frequency: str, years: int):
         self.principal = principal_start
         self.interest_rate = interest_rate
-        self.payment_frequency = AmortizationService.payment_frequency[payment_frequency]
+        self.payment_frequency = (payment_frequency, AmortizationService.payment_frequency[payment_frequency])
         self.years = years
         self.effecive_rate = self._calculate_effective_periodic_interest_rate()
-
-
 
     def _calculate_effective_periodic_interest_rate(self) -> float:
         '''
@@ -45,7 +43,7 @@ class AmortizationService:
         base_growth = 1 + (self.interest_rate / AmortizationService.fixed_rate_compounding_periods)
 
         # ratio of how often the bank compounds vs how often user pays
-        compounding_ratio = (AmortizationService.fixed_rate_compounding_periods / self.payment_frequency)
+        compounding_ratio = (AmortizationService.fixed_rate_compounding_periods / self.payment_frequency[1])
 
         #calculate final effective rate
         effective_rate = (base_growth ** compounding_ratio) - 1
