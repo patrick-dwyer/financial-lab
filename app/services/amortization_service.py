@@ -7,58 +7,110 @@ class AmortizationService:
     This class requires:
         - principal_start: the total amount of the mortgage loan
         - interest_rate: the interest rate at which the loan is being provided by the lender
-        - years: the length of time that the loan is scheduled, the amortization
+        - amortization_years: the length of time that the loan is scheduled, the amortization
+        - payment_frequency: what type of schedule you plan to pay off your loan (monthly, semi-monthly, bi-weekly, etc)
 
     Class Variables:
         - payment_frequency: describes how many payments are put towards the mortgage each year
+        - months_in_a_year: variable used to represent 12 months in a year for calculations
+        - fixed_rate_compounding_periods: in Canada, any fixed rate mortgage only comopunds 2 times a year
     '''
 
-    # dictionary of payments per year based on frequency of payments
+    # dictionary of tuples that include
+    # -payments per year based on frequency of payments at position 0
+    # -factor based on number payment months / number of payments
     payment_frequency = {
-        "monthly": 12,
-        "semi_monthly": 24,
-        "bi_weekly": 26,
-        "acc_bi_weekly": 26,
-        "weekly": 52,
-        "acc_weekly": 52
+        "monthly":        (12, 12/12),
+        "semi_monthly":   (24, 12/24),
+        "bi_weekly":      (26, 12/26),
+        "acc_bi_weekly":  (26, 13/26),
+        "weekly":         (52, 12/52),
+        "acc_weekly":     (52, 13/52)
     }
 
+    # number of months in a year
+    months_in_a_year = 12
+
+    # number of periods that compound interest is calculated on a fixed rate mortgage in Canada
     fixed_rate_compounding_periods = 2
 
     
-    def __init__(self, principal_start: float, interest_rate: float, payment_frequency: str, years: int):
+    def __init__(self, principal_start: float, interest_rate: float, amortization_years: int, payment_frequency: str):
+        '''
+        Initialize core attributes for AmmortizationService
+            - principal_start: the starting principal of the mortgage loan.
+            - interest_rate: the posted interest rate provided for the start of the mortgage.
+            - amortization_years: the total length in years of the mortgage loan.
+            - monthly_anchor_interest_rate: the effective interest rate calculated over 12 payments in a year.
+            - total_number_of_payments: the total amount of payments over your mortgage lifespan at a monthly payment frequency.
+            - monthly_anchor_payments: the amount paid for a frequency of monthly payments over your mortgage.
+            - payment_frequency: tuple that holds two parts.
+                1) the payment frequency that was inputted by the user (i.e. monthly, semi-monthly, bi-weekly, etc.).
+                2) another tuple that holds in position 0 the number of payments in year and position 1 the ratio of months paid to payments made in that year.
+            - payment_per_frequency: calculates the payment amount made for the specific frequency provided by the user.
+        '''
         self.principal = principal_start
         self.interest_rate = interest_rate
+        self.amortization_years = amortization_years
+        self.monthly_anchor_interest_rate = self._calculate_anchor_interest_rate()
+        self.total_number_of_payments = self.amortization_years * AmortizationService.months_in_a_year
+        self.monthly_anchor_payments = self._calculate_monthly_payment_anchor()
         self.payment_frequency = (payment_frequency, AmortizationService.payment_frequency[payment_frequency])
-        self.years = years
-        self.effecive_rate = self._calculate_effective_periodic_interest_rate()
+        self.payment_per_frequency = self.monthly_anchor_payments * self.payment_frequency[1][1]
+        
 
-    def _calculate_effective_periodic_interest_rate(self) -> float:
+    def _calculate_anchor_interest_rate(self) -> float:
         '''
-        Internal calculator to determine the interest rate applied over the course of the loan ammortization.
-        This takes into account the effects of compounding.
+        Calculate the base monthly payment based on the mortgage loan.
+        This does not include what type of payment plan is selected.
+
+        Formula is i = [(1 + r/C)**C/N] - 1
+        
+        (i) Effective Periodic Interest Rate
+        (r) Nominal Annual Interest Rate
+        (C) Compounding periods (in Canada, fixed rate is 2)
+        (N) Payment Periods
+        '''
+
+        growth_base = 1 + (self.interest_rate / 2)
+
+        compounding_to_payment_ratio = 2 / AmortizationService.months_in_a_year
+
+        return (growth_base ** compounding_to_payment_ratio) - 1        
+    
+    def _calculate_monthly_payment_anchor(self) -> float:
+        '''
+        Internal calculator to determine the monthly payment basis of loan.
+
+        Formula is [P * i] / [1 - (1 + i )**-n ]
+
+        (p) Principal
+        (i) Monthly Effective Interest Rate
+        (n) Total number of monthly periods
         '''
         
-        # the base growth rate per compounding period
-        base_growth = 1 + (self.interest_rate / AmortizationService.fixed_rate_compounding_periods)
+        # the cost of borrowing against the principal
+        principal_interest = self.principal * self.monthly_anchor_interest_rate
 
-        # ratio of how often the bank compounds vs how often user pays
-        compounding_ratio = (AmortizationService.fixed_rate_compounding_periods / self.payment_frequency[1])
+        # discount factor that spreads the principal and interest over the total number of periods
+        discount_factor = 1 - (1 + self.monthly_anchor_interest_rate)**-(self.total_number_of_payments)
 
-        #calculate final effective rate
-        effective_rate = (base_growth ** compounding_ratio) - 1
-
-        return effective_rate
+        # combinator of the two factors to determin the base monthly payments
+        return principal_interest / discount_factor   
 
 if __name__ == "__main__":
     # This only runs if you execute the file directly
     test_service = AmortizationService(
         principal_start=500000,
-        interest_rate=0.03,
-        payment_frequency="monthly",
-        years=25
+        interest_rate=0.05,
+        payment_frequency="acc_weekly",
+        amortization_years=25
         )
-    print(test_service.effecive_rate)
+
+    print(test_service.monthly_anchor_interest_rate)
+    print(test_service.monthly_anchor_payments)
+    print(test_service.payment_per_frequency)
     print("Test successful!")
+
 
 
