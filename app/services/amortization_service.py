@@ -1,3 +1,5 @@
+import pandas as pd
+
 from app.models.amortization import AmortizationRow
 
 class AmortizationService:
@@ -35,7 +37,7 @@ class AmortizationService:
     fixed_rate_compounding_periods = 2
 
     
-    def __init__(self, principal_start: float, interest_rate: float, amortization_years: int, payment_frequency: str):
+    def __init__(self, principal_start: float, interest_rate: float, amortization_years: int, payment_frequency: str, term: int):
         '''
         Initialize core attributes for AmmortizationService
             - principal_start: the starting principal of the mortgage loan.
@@ -48,6 +50,7 @@ class AmortizationService:
                 1) the payment frequency that was inputted by the user (i.e. monthly, semi-monthly, bi-weekly, etc.).
                 2) another tuple that holds in position 0 the number of payments in year and position 1 the ratio of months paid to payments made in that year.
             - payment_per_frequency: calculates the payment amount made for the specific frequency provided by the user.
+            - term: the contract set for a period within your amortization for a certain interest rate on your principal.
         '''
         self.principal = principal_start
         self.interest_rate = interest_rate
@@ -57,6 +60,8 @@ class AmortizationService:
         self.monthly_anchor_payments = self._calculate_monthly_payment_anchor()
         self.payment_frequency = (payment_frequency, AmortizationService.payment_frequency[payment_frequency])
         self.payment_per_frequency = self.monthly_anchor_payments * self.payment_frequency[1][1]
+        self.term = term
+        self.amortization_table = self._calculate_amortization_table()
         
 
     def _calculate_anchor_interest_rate(self) -> float:
@@ -98,18 +103,51 @@ class AmortizationService:
         # combinator of the two factors to determin the base monthly payments
         return principal_interest / discount_factor   
 
+    def _calculate_amortization_table(self):
+        '''
+        Internal calculator to create table representing all payments over the mortage
+        based on the initial term.
+        '''
+        
+        # data frame to hold information from each monthly payment
+        amortization_df = pd.DataFrame(
+            data=None,
+            columns=["interest_paid", "principal_paid", "new_principal_balance"]
+        )
+
+        # loop to calculate each payment to principal and interest
+        x = 0
+        while x != self.total_number_of_payments + 1:
+            
+            # calculate interest owed
+            interest_paid = self.principal * self.monthly_anchor_interest_rate
+
+            # calculate how much of your payment is principal
+            principal_paid = self.payment_per_frequency - interest_paid
+
+            # deduct principal payment from total principal
+            self.principal = self.principal - principal_paid
+
+            # add row to amortization_df
+            amortization_df.loc[len(amortization_df)] = [interest_paid, principal_paid, self.principal]
+            
+            # loop variable +1
+            x += 1      
+
+        return amortization_df
+
+
 if __name__ == "__main__":
     # This only runs if you execute the file directly
     test_service = AmortizationService(
         principal_start=500000,
+        amortization_years=25,
         interest_rate=0.05,
-        payment_frequency="acc_weekly",
-        amortization_years=25
+        payment_frequency="monthly",
+        term=5
         )
-
-    print(test_service.monthly_anchor_interest_rate)
-    print(test_service.monthly_anchor_payments)
-    print(test_service.payment_per_frequency)
+    
+    print(test_service.amortization_table)
     print("Test successful!")
 
 
