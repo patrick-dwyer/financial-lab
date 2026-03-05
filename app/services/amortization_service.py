@@ -49,13 +49,13 @@ class AmortizationService:
             - payment_frequency: tuple that holds two parts.
                 1) the payment frequency that was inputted by the user (i.e. monthly, semi-monthly, bi-weekly, etc.).
                 2) another tuple that holds in position 0 the number of payments in year and position 1 the ratio of months paid to payments made in that year.
-            - payment_per_frequency: calculates the payment amount made for the specific frequency provided by the user.
+            - payment_per_frequency: calculates the payment amount required for the specific frequency provided by the user.
             - term: the contract set for a period within your amortization for a certain interest rate on your principal.
         '''
         self.principal = principal_start
         self.interest_rate = interest_rate
         self.amortization_years = amortization_years
-        self.monthly_anchor_interest_rate = self._calculate_anchor_interest_rate()
+        self.monthly_anchor_interest_rate = self._calculate_interest_rate(self.interest_rate, AmortizationService.months_in_a_year)
         self.total_number_of_payments = self.amortization_years * AmortizationService.months_in_a_year
         self.monthly_anchor_payments = self._calculate_monthly_payment_anchor()
         self.payment_frequency = (payment_frequency, AmortizationService.payment_frequency[payment_frequency])
@@ -64,10 +64,9 @@ class AmortizationService:
         self.amortization_table = self._calculate_amortization_table()
         
 
-    def _calculate_anchor_interest_rate(self) -> float:
+    def _calculate_interest_rate(self, interest_rate, payment_frequency) -> float:
         '''
-        Calculate the base monthly payment based on the mortgage loan.
-        This does not include what type of payment plan is selected.
+        Calculate the interest rate calculated on each payment.
 
         Formula is i = [(1 + r/C)**C/N] - 1
         
@@ -77,9 +76,9 @@ class AmortizationService:
         (N) Payment Periods
         '''
 
-        growth_base = 1 + (self.interest_rate / 2)
+        growth_base = 1 + (interest_rate / 2)
 
-        compounding_to_payment_ratio = 2 / AmortizationService.months_in_a_year
+        compounding_to_payment_ratio = 2 / payment_frequency
 
         return (growth_base ** compounding_to_payment_ratio) - 1        
     
@@ -107,6 +106,9 @@ class AmortizationService:
         '''
         Internal calculator to create table representing all payments over the mortage
         based on the initial term.
+
+        This does take into account what your actual payments and interest rate are depending
+        on what type of payment schedule you have selected (monthly, semi_monthly, weekly, acc_weekly, etc)
         '''
         
         # data frame to hold information from each monthly payment
@@ -115,12 +117,19 @@ class AmortizationService:
             columns=["interest_paid", "principal_paid", "new_principal_balance"]
         )
 
+        # calculate per payment interest rate 
+        payment_interest_rate = self._calculate_interest_rate(
+            self.interest_rate,
+            self.payment_frequency[1][0]
+        )
+        
         # loop to calculate each payment to principal and interest
         x = 0
-        while x != self.total_number_of_payments + 1:
+        while x != (self.total_number_of_payments * (1 / self.payment_frequency[1][1])) + 1:
+            
             
             # calculate interest owed
-            interest_paid = self.principal * self.monthly_anchor_interest_rate
+            interest_paid = self.principal * payment_interest_rate
 
             # calculate how much of your payment is principal
             principal_paid = self.payment_per_frequency - interest_paid
@@ -131,9 +140,13 @@ class AmortizationService:
             # add row to amortization_df
             amortization_df.loc[len(amortization_df)] = [interest_paid, principal_paid, self.principal]
             
+            # stop loop when payments are completed
+            if self.principal < 0:
+                return amortization_df
+            
             # loop variable +1
             x += 1      
-
+        
         return amortization_df
 
 
@@ -146,8 +159,8 @@ if __name__ == "__main__":
         payment_frequency="monthly",
         term=5
         )
-    
     print(test_service.amortization_table)
+    
     print("Test successful!")
 
 
