@@ -1,7 +1,5 @@
 import pandas as pd
 
-from app.models.amortization import AmortizationRow
-
 class AmortizationService:
     '''
     Represents the calculation of a users ammortization of their mortgage.

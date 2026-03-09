@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mortgage Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Mortgage Lab</h2>
+                <button onclick="addBlock('Lump Sum')">➕ Lump Sum</button>
+                <button onclick="addBlock('Rate Change')">➕ Rate Change</button>
+                <button onclick="collectData()" class="calc-btn">🚀 Calculate</button>
+            </div>
+
+            <div id="block-container" class="block-stack">
+                <div class="block base">Base Mortgage</div>
+            </div>
+        </aside>
+
+        <main class="results-area">
+            <div class="stats-row">
+                <div class="stat-card">Interest Saved: <span id="saved-amt">$0</span></div>
+                <div class="stat-card">Payoff Date: <span id="payoff-date">--</span></div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="mortgageChart"></canvas>
+                <p id="chart-placeholder" style="color: #666; text-align: center; margin-top: 100px;">
+                    Chart will render here after calculation...
+                </p>
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
