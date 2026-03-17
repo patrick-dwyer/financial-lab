@@ -10,10 +10,17 @@ class AmortizationService:
         - amortization_years: the length of time that the loan is scheduled, the amortization
         - payment_frequency: what type of schedule you plan to pay off your loan (monthly, semi-monthly, bi-weekly, etc)
 
-    Class Variables:
+    Class variables:
         - payment_frequency: describes how many payments are put towards the mortgage each year
         - months_in_a_year: variable used to represent 12 months in a year for calculations
         - fixed_rate_compounding_periods: in Canada, any fixed rate mortgage only comopunds 2 times a year
+
+    Class methods:
+        __init__: initializes core attributes for the AmortizationService object.
+        _calculate_interest__rate: calculate interest rate of each payment.
+        _calculate_monthly_payment_anchor: calculate monthly payment amount.
+        _calculate_amortization_table: calculate base amortization table for mortgage.
+
     '''
 
     # dictionary of tuples that include
@@ -100,14 +107,21 @@ class AmortizationService:
         # combinator of the two factors to determin the base monthly payments
         return principal_interest / discount_factor   
 
-    def _calculate_amortization_table(self):
+    def _calculate_amortization_table(self, event_data=None):
         '''
         Internal calculator to create table representing all payments over the mortage
         based on the initial term.
 
         This does take into account what your actual payments and interest rate are depending
         on what type of payment schedule you have selected (monthly, semi_monthly, weekly, acc_weekly, etc)
-        '''
+        '''   
+
+        # local copy of principal and interest rate
+        current_principal = self.principal
+        current_annual_rate = self.interest_rate
+
+        # catch any data from front end input blocks
+        events = {int(item['month']): item for item in (event_data or [])}
         
         # data frame to hold information from each monthly payment
         amortization_df = pd.DataFrame(
@@ -117,33 +131,42 @@ class AmortizationService:
 
         # calculate per payment interest rate 
         payment_interest_rate = self._calculate_interest_rate(
-            self.interest_rate,
+            current_annual_rate,
             self.payment_frequency[1][0]
         )
         
         # loop to calculate each payment to principal and interest
-        x = 0
-        while x != (self.total_number_of_payments * (1 / self.payment_frequency[1][1])) + 1:
+        total_steps = int(self.total_number_of_payments * (1/ self.payment_frequency[1][1]))
+        for month in range(1, total_steps + 2):           
             
-            
+            ## dynamic section to include block alterations
+            if month in events:
+                block = events[month]
+                if block['type'] == "Lump Sum":
+                    current_principal -= block['value']
+                elif block['type'] == "Rate Change":
+                    current_annual_rate = block['value']
+                    payment_interest_rate = self._calculate_interest_rate(
+                        current_annual_rate,
+                        self.payment_frequency[1][0]
+                    )
+
+            ## main loop logic for calculations
             # calculate interest owed
-            interest_paid = self.principal * payment_interest_rate
+            interest_paid = current_principal * payment_interest_rate
 
             # calculate how much of your payment is principal
             principal_paid = self.payment_per_frequency - interest_paid
 
             # deduct principal payment from total principal
-            self.principal = self.principal - principal_paid
+            current_principal -= principal_paid
 
             # add row to amortization_df
-            amortization_df.loc[len(amortization_df)] = [interest_paid, principal_paid, self.principal]
+            amortization_df.loc[len(amortization_df)] = [interest_paid, principal_paid, current_principal]
             
             # stop loop when payments are completed
-            if self.principal < 0:
-                return amortization_df
-            
-            # loop variable +1
-            x += 1      
+            if current_principal <= 0:
+                break
         
         return amortization_df
 
