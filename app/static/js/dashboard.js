@@ -1,3 +1,6 @@
+// variable to hold the chart instance
+let mortgageChart = null;
+
 function collectData() {
     console.log("Calculate clicked - gathering data from blocks...");
     const container = document.getElementById('block-container');
@@ -15,10 +18,18 @@ function collectData() {
 
         // Extract values from the specific inputs we built earlier
         const month = block.querySelector('.block-month').value;
-        const value = block.querySelector('.block-amount').value;
+        let value = block.querySelector('.block-amount').value;
 
         // Only add to our list if the user actually typed something
-        if (month && value) {
+        if (month && value) {            
+
+            if (type === "Rate Change") {
+                value = value / 100
+            }
+
+            console.log(month)
+            console.log(value)
+
             eventData.push({
                 type: type,
                 month: parseInt(month),
@@ -29,18 +40,31 @@ function collectData() {
 
     // --- THE HANDSHAKE START ---
     fetch('/calculate', {
-        method: 'POST', // Telling the server we are "Posting" a package
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/json', // Telling Python the package contains JSON
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify(eventData), // Turning the list into a string for transport
+        body: JSON.stringify(eventData),
     })
-    .then(response => response.json()) // Waiting for Python to answer and parsing its JSON
+    .then(response => response.json())
     .then(data => {
+        // 1. Log the result so we can see it in the console
         console.log("Python Calculation Result:", data);
-        // This is where we will eventually update the chart and stats!
+        
+        // 2. TRIGGER THE VISUALS
+        // Make sure these names match exactly what Python sends back in jsonify()
+        updateChart(data.base_df, data.scenario_df);
+        
+        // 3. UPDATE THE STAT CARDS
+        // I'm assuming you have an ID for your interest saved display
+        const savedElement = document.getElementById('interest-saved-val');
+        if (savedElement) {
+            savedElement.innerText = `$${data.interest_saved.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        }
     })
-    .catch(error => console.error('Error:', error)); // Error handling if the server is down
+    .catch(error => {
+        console.error('Handshake failed:', error);
+    });
     
 
     console.log("Cleaned Data for Python:", eventData);
@@ -92,4 +116,64 @@ function sortBlocks() {
     container.innerHTML = '';
     if (baseBlock) container.appendChild(baseBlock);
     dynamicBlocks.forEach(block => container.appendChild(block));
+}
+
+function updateChart(baseBalances, scenarioBalances) {
+    const ctx = document.getElementById('mortgageChart').getContext('2d');
+
+    // if chart already exists, destroy it before making a new one
+    if (mortgageChart) {
+        mortgageChart.destroy();
+    }
+
+    // 3. Create X-axis labels (Month 0, 1, 2, 3...)
+    const maxMonths = Math.max(baseBalances.length, scenarioBalances.length);
+    const labels = Array.from({length: maxMonths}, (_, i) => i);
+
+    // 4. Initialize the Chart
+    mortgageChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Original Mortgage',
+                    data: baseBalances,
+                    borderColor: 'rgba(75, 192, 192, 1)', // Teal
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 0, // Hides dots for a clean line
+                    fill: true
+                },
+                {
+                    label: 'With Blocks',
+                    data: scenarioBalances,
+                    borderColor: 'rgba(255, 99, 132, 1)', // Pink/Red
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // allows chart to fill full container height
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    min: 0,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    },
+                    title: { display: true, text: 'Remaining Principal ($)' }
+                },
+                x: {
+                    title: { display: true, text: 'Month' }
+                }
+            }
+        }
+    });
 }

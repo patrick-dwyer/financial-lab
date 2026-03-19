@@ -22,17 +22,15 @@
         </aside>
 
         <main class="results-area">
-            <div class="stats-row">
-                <div class="stat-card">Interest Saved: <span id="saved-amt">$0</span></div>
-                <div class="stat-card">Payoff Date: <span id="payoff-date">--</span></div>
-            </div>
+                <div class="stats-row">
+                    <div class="stat-card">Interest Saved: <span id="interest-saved-val">$0</span></div>
+                    <div class="stat-card">Payoff Date: <span id="payoff-date">--</span></div>
+                </div>
+    
             <div class="chart-wrapper">
                 <canvas id="mortgageChart"></canvas>
-                <p id="chart-placeholder" style="color: #666; text-align: center; margin-top: 100px;">
-                    Chart will render here after calculation...
-                </p>
-            </div>
-        </main>
+                </div>
+        </main>    
     </div>
 
     <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>

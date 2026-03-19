@@ -39,8 +39,8 @@ def calculate_mortgage():
     return jsonify({
         "status": "success",
         "message": f"Python received {len(event_data)} blocks",
-        "base_df": f"{len(base_df)}",
-        "scenario_df": f"{len(scenario_df)}",
+        "base_df": base_df['new_principal_balance'].tolist(),
+        "scenario_df": scenario_df['new_principal_balance'].tolist(),
         # "saved_interest": 50000, # dummy data
         # "new_payoff_date": "Jan 2045" # dummy data
     })
