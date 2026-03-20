@@ -64,7 +64,6 @@ class AmortizationService:
             - payment_per_frequency: calculates the payment amount required for the specific frequency provided by the user.
             - term: the contract set for a period within your amortization for a certain interest rate on your principal.
             - amortization_table: table of principal, interest, and a new principal balance after every payment at a set frequency.
-            - interest_paid: total amount of interest paid over the mortgage.
         '''
         self.principal = principal_start
         self.interest_rate = interest_rate
