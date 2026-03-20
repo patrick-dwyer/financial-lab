@@ -53,7 +53,7 @@ function collectData() {
         
         // 2. TRIGGER THE VISUALS
         // Make sure these names match exactly what Python sends back in jsonify()
-        updateChart(data.base_df, data.scenario_df);
+        updateChart(data.base_principal, data.scenario_principal);
         
         // 3. UPDATE THE STAT CARDS
         // I'm assuming you have an ID for your interest saved display

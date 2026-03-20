@@ -42,7 +42,14 @@ class AmortizationService:
     fixed_rate_compounding_periods = 2
 
     
-    def __init__(self, principal_start: float, interest_rate: float, amortization_years: int, payment_frequency: str, term: int):
+    def __init__(
+            self, 
+            principal_start: float, 
+            interest_rate: float, 
+            amortization_years: int, 
+            payment_frequency: str, 
+            term: int, 
+            ):
         '''
         Initialize core attributes for AmmortizationService
             - principal_start: the starting principal of the mortgage loan.
@@ -56,6 +63,8 @@ class AmortizationService:
                 2) another tuple that holds in position 0 the number of payments in year and position 1 the ratio of months paid to payments made in that year.
             - payment_per_frequency: calculates the payment amount required for the specific frequency provided by the user.
             - term: the contract set for a period within your amortization for a certain interest rate on your principal.
+            - amortization_table: table of principal, interest, and a new principal balance after every payment at a set frequency.
+            - interest_paid: total amount of interest paid over the mortgage.
         '''
         self.principal = principal_start
         self.interest_rate = interest_rate
@@ -168,7 +177,15 @@ class AmortizationService:
             if current_principal <= 0:
                 break
         
-        return amortization_df
+        current_principal_list = amortization_df['new_principal_balance'].tolist()
+        total_interest = amortization_df['interest_paid']
+        payoff_month = len(amortization_df)
+
+        return {
+            "current_principal_list": current_principal_list,
+            "total_interest": total_interest,
+            "payoff_month": payoff_month
+        }
 
 
 if __name__ == "__main__":

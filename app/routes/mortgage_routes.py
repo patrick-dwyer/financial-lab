@@ -4,11 +4,8 @@ from app.services.amortization_service import AmortizationService
 # Create Blueprint so the main app knows these routes exist
 mortgage_routes = Blueprint('mortgage_routes', __name__)
 
-@mortgage_routes.route('/test')
-def hello_world():
-    return "The handshake is working! Hello from the Mortgage Route."
 
-@mortgage_routes.route('/main')
+@mortgage_routes.route('/')
 def main_screen():
     return render_template('index.html')
 
@@ -27,20 +24,16 @@ def calculate_mortgage():
     )
 
     # 3. capture base information 
-    base_df = my_mortgage.amortization_table
+    base = my_mortgage.amortization_table 
 
     # 4. run a secondary scenario with blocks included
-    scenario_df = my_mortgage._calculate_amortization_table(event_data=event_data)
-    
-    print(base_df.tail(5))
-    print(scenario_df.tail(5))
+    scenario = my_mortgage._calculate_amortization_table(event_data=event_data)
 
     # 5. Pass the response back to front end
     return jsonify({
         "status": "success",
         "message": f"Python received {len(event_data)} blocks",
-        "base_df": base_df['new_principal_balance'].tolist(),
-        "scenario_df": scenario_df['new_principal_balance'].tolist(),
-        # "saved_interest": 50000, # dummy data
-        # "new_payoff_date": "Jan 2045" # dummy data
+        "base_principal": base['current_principal_list'],
+        "scenario_principal": scenario['current_principal_list']
+
     })
