@@ -10,18 +10,21 @@ function collectData() {
     const eventData = [];
 
     blocks.forEach(block => {
-        // base mortgage calculations
+        
+        // Base mortgage calculations
         if (block.classList.contains('base')) {
 
-            // fields for base mortgage
+            // extract values from base mortgage block
             const type = block.querySelector('strong').innerText;
             let principal = block.querySelector('.base-principal').value;
             let amortization = block.querySelector('.base-amortization').value;
             let interest = block.querySelector('.base-interest').value;
             let payment = block.querySelector('.base-payment').value;
 
+            // convert whole number interst to decimal for calculations
+            interest = interest / 100
 
-            // only add to block data if all fields completed
+            // Only add to block data if all fields completed
             if (type && principal && amortization && interest && payment) {
                 eventData.push({
                     type: type,
@@ -31,32 +34,30 @@ function collectData() {
                     payment: payment
                 })
             }
-            
-        };
-        
-        // Find the type (Lump Sum or Rate Change) from the <strong> tag
-        const type = block.querySelector('strong').innerText;
 
-        // Extract values from the specific inputs we built earlier
-        const month = block.querySelector('.block-month').value;
-        let value = block.querySelector('.block-amount').value;
+        } else {
+            // Find the type (Lump Sum or Rate Change) from the <strong> tag
+            const type = block.querySelector('strong').innerText;
 
-        // Only add to our list if the user actually typed something
-        if (month && value) {            
+            // Extract values from the specific inputs we built earlier
+            const month = block.querySelector('.block-month').value;
+            let value = block.querySelector('.block-amount').value;
 
-            if (type === "Rate Change") {
-                value = value / 100
+            // Only add to our list if the user actually typed something
+            if (month && value) {            
+
+                if (type === "Rate Change") {
+                    value = value / 100
+                }
+
+                eventData.push({
+                    type: type,
+                    month: parseInt(month),
+                    value: parseFloat(value)
+                });
             }
 
-            console.log(month)
-            console.log(value)
-
-            eventData.push({
-                type: type,
-                month: parseInt(month),
-                value: parseFloat(value)
-            });
-        }
+        };        
     });
 
     // --- THE HANDSHAKE START ---
@@ -75,6 +76,7 @@ function collectData() {
         // 2. TRIGGER THE VISUALS
         // Make sure these names match exactly what Python sends back in jsonify()
         updateChart(data.base_principal, data.scenario_principal);
+        
         
         // 3. UPDATE THE STAT CARDS
         // I'm assuming you have an ID for your interest saved display

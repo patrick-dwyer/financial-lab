@@ -14,18 +14,20 @@ def calculate_mortgage():
     # 1. Receive data from front end
     event_data = request.get_json()
 
-    print(event_data)
-
+    print()
     # 2. create instance of "base" mortgage
     my_mortgage = AmortizationService(
-        principal_start=500000,
-        amortization_years=25,
-        interest_rate=0.05,
-        payment_frequency="monthly"
+        principal_start= event_data[0]['principal'],
+        amortization_years= event_data[0]['amortization'],
+        interest_rate= event_data[0]['interest'],
+        payment_frequency= event_data[0]['payment']
     )
 
     # 3. capture base information 
     base = my_mortgage.amortization_table 
+
+    # slice out data related to base mortgage
+    event_data = event_data[1:]
 
     # 4. run a secondary scenario with blocks included
     scenario = my_mortgage._calculate_amortization_table(event_data=event_data)
