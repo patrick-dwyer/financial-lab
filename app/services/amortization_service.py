@@ -47,8 +47,7 @@ class AmortizationService:
             principal_start: float, 
             interest_rate: float, 
             amortization_years: int, 
-            payment_frequency: str, 
-            term: int, 
+            payment_frequency: str
             ):
         '''
         Initialize core attributes for AmmortizationService
@@ -62,7 +61,6 @@ class AmortizationService:
                 1) the payment frequency that was inputted by the user (i.e. monthly, semi-monthly, bi-weekly, etc.).
                 2) another tuple that holds in position 0 the number of payments in year and position 1 the ratio of months paid to payments made in that year.
             - payment_per_frequency: calculates the payment amount required for the specific frequency provided by the user.
-            - term: the contract set for a period within your amortization for a certain interest rate on your principal.
             - amortization_table: table of principal, interest, and a new principal balance after every payment at a set frequency.
         '''
         self.principal = principal_start
@@ -73,7 +71,6 @@ class AmortizationService:
         self.monthly_anchor_payments = self._calculate_monthly_payment_anchor()
         self.payment_frequency = (payment_frequency, AmortizationService.payment_frequency[payment_frequency])
         self.payment_per_frequency = self.monthly_anchor_payments * self.payment_frequency[1][1]
-        self.term = term
         self.amortization_table = self._calculate_amortization_table()
         
 
@@ -117,8 +114,7 @@ class AmortizationService:
 
     def _calculate_amortization_table(self, event_data=None):
         '''
-        Internal calculator to create table representing all payments over the mortage
-        based on the initial term.
+        Internal calculator to create table representing all payments over the mortage.
 
         This does take into account what your actual payments and interest rate are depending
         on what type of payment schedule you have selected (monthly, semi_monthly, weekly, acc_weekly, etc)
@@ -193,8 +189,7 @@ if __name__ == "__main__":
         principal_start=500000,
         amortization_years=25,
         interest_rate=0.05,
-        payment_frequency="monthly",
-        term=5
+        payment_frequency="monthly"
         )
     print(test_service.amortization_table)
     

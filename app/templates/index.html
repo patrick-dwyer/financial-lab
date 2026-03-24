@@ -22,8 +22,27 @@
                         <strong>Base Mortgage</strong>
                     </div>
                     <div style="margin-top:10px;">
-                        <label>Month:</label>
-                        <input type="number" class="block-month" placeholder="60" style="width:60px">
+                        <label>Principal:</label>
+                        <input type="number" class="base-principal" placeholder="$500,000" style="width:80px">
+                    </div>
+                    <div style="margin-top:10px;">
+                        <label>Amortization Years:</label>
+                        <input type="number" class="base-amortization" placeholder="30" style="width:80px">
+                    </div>
+                    <div style="margin-top:10px;">
+                        <label>Interest Rate:</label>
+                        <input type="number" class="base-interest" placeholder="5.00%" style="width:80px">
+                    </div>
+                    <div style="margin-top:10px;">
+                        <label for="payment_schedule">Payment Schedule:</label>
+                        <select name="payment_schedule" id="payment_schedule" class="base-payment" placeholder="Monthly" style="width:80px">
+                            <option value="Monthly">Monthly</option>
+                            <option value="Semi Monthly">Semi Monthly</option>
+                            <option value="Bi Weekly">Bi Weekly</option>
+                            <option value="Accelerated Bi Weekly">Accelerated Bi Weekly</option>
+                            <option value="Weekly">Weekly</option>
+                            <option value="Accelerated Weekly">Accelerated Weekly</option>
+                        </select>
                     </div>
                 </div>
                     

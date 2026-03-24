@@ -10,9 +10,30 @@ function collectData() {
     const eventData = [];
 
     blocks.forEach(block => {
-        // Skip the "Base Mortgage" block since it doesn't have the event inputs
-        if (block.classList.contains('base')) return;
+        // base mortgage calculations
+        if (block.classList.contains('base')) {
 
+            // fields for base mortgage
+            const type = block.querySelector('strong').innerText;
+            let principal = block.querySelector('.base-principal').value;
+            let amortization = block.querySelector('.base-amortization').value;
+            let interest = block.querySelector('.base-interest').value;
+            let payment = block.querySelector('.base-payment').value;
+
+
+            // only add to block data if all fields completed
+            if (type && principal && amortization && interest && payment) {
+                eventData.push({
+                    type: type,
+                    principal: parseFloat(principal),
+                    amortization: parseFloat(amortization),
+                    interest: parseFloat(interest),
+                    payment: payment
+                })
+            }
+            
+        };
+        
         // Find the type (Lump Sum or Rate Change) from the <strong> tag
         const type = block.querySelector('strong').innerText;
 

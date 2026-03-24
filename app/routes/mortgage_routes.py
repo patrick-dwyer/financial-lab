@@ -14,13 +14,14 @@ def calculate_mortgage():
     # 1. Receive data from front end
     event_data = request.get_json()
 
+    print(event_data)
+
     # 2. create instance of "base" mortgage
     my_mortgage = AmortizationService(
         principal_start=500000,
         amortization_years=25,
         interest_rate=0.05,
-        payment_frequency="monthly",
-        term=5
+        payment_frequency="monthly"
     )
 
     # 3. capture base information 
