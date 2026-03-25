@@ -60,7 +60,7 @@ class AmortizationService:
             - payment_frequency: tuple that holds two parts.
                 1) the payment frequency that was inputted by the user (i.e. monthly, semi-monthly, bi-weekly, etc.).
                 2) another tuple that holds in position 0 the number of payments in year and position 1 the ratio of months paid to payments made in that year.
-            - payment_per_frequency: calculates the payment amount required for the specific frequency provided by the user.
+            - min_payment_per_frequency: calculates the minimum payment amount required for the specific frequency provided by the user.
             - amortization_table: table of principal, interest, and a new principal balance after every payment at a set frequency.
         '''
         self.principal = principal_start
@@ -70,7 +70,7 @@ class AmortizationService:
         self.total_number_of_payments = self.amortization_years * AmortizationService.months_in_a_year
         self.monthly_anchor_payments = self._calculate_monthly_payment_anchor()
         self.payment_frequency = (payment_frequency, AmortizationService.payment_frequency[payment_frequency])
-        self.payment_per_frequency = self.monthly_anchor_payments * self.payment_frequency[1][1]
+        self.min_payment_per_frequency = self.monthly_anchor_payments * self.payment_frequency[1][1]
         self.amortization_table = self._calculate_amortization_table()
         
 
@@ -123,6 +123,7 @@ class AmortizationService:
         # local copy of principal and interest rate
         current_principal = self.principal
         current_annual_rate = self.interest_rate
+        payment_per_frequency = self.min_payment_per_frequency
 
         # catch any data from front end input blocks
         events = {int(item['month']): item for item in (event_data or [])}
@@ -154,13 +155,15 @@ class AmortizationService:
                         current_annual_rate,
                         self.payment_frequency[1][0]
                     )
+                elif block['type'] == "Payment Change":
+                    payment_per_frequency = block['value']
 
             ## main loop logic for calculations
             # calculate interest owed
             interest_paid = current_principal * payment_interest_rate
 
             # calculate how much of your payment is principal
-            principal_paid = self.payment_per_frequency - interest_paid
+            principal_paid = payment_per_frequency - interest_paid
 
             # deduct principal payment from total principal
             current_principal -= principal_paid

@@ -99,9 +99,16 @@ function addBlock(type) {
     const newBlock = document.createElement('div');
     newBlock.className = 'block';
     
-    const label = type === "Lump Sum" ? "Amount:" : "New Percent:";
-    const placeholder = type === "Lump Sum" ? "$" : "%";
+    let label = "Amount:";
+    let placeholder = "$";
 
+    if (type === "Rate Change") {
+        label = "New Percent:";
+        placeholder = "%";
+    } else if (type === "Payment Change") {
+        label = "New Monthly:";
+        placeholder = "$";
+    }
     
     newBlock.innerHTML = `
         <div style="display: flex; justify-content: space-between;">
