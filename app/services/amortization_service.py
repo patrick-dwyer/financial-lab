@@ -175,12 +175,54 @@ class AmortizationService:
             if current_principal <= 0:
                 break
         
+        ## calculate monthly representation of principle for visual
+        # capture list of table for principal values
         current_principal_list = amortization_df['new_principal_balance'].tolist()
-        total_interest = amortization_df['interest_paid']
-        payoff_month = len(amortization_df)
+
+        # find number that represents "payments per year" (i.e. 52 for weekly)
+        payments_per_year = self.payment_frequency[1][0]
+
+        # calculate fractional step to get 1 month (i.e. weekly: 52 / 12 = 4.333)
+        step = payments_per_year / 12
+
+        # create downsampled list for chart
+        down_sampled_principal = [self.principal] # start with beginning principal
+
+        # loop to calculate downsampled list
+        month = 1
+        while True:
+
+            # calculate the exact target month for list
+            target_index = round(month * step) - 1
+
+            # check if index exists in full table
+            if target_index < len(current_principal_list):
+                balance = current_principal_list[target_index]
+                down_sampled_principal.append(balance)
+
+                # break if we hit $0
+                if balance <= 0:
+                    break
+                
+                # move to next month
+                month += 1
+            
+            else:
+                # safety to try and append last number if loop ends and we have not hit 0 yet!
+                if down_sampled_principal[-1] != current_principal_list[-1]:
+                    down_sampled_principal.append(current_principal_list[-1])
+                break
+        
+        
+
+        # sum of all interest rows paid
+        total_interest = amortization_df['interest_paid'].sum()
+        
+        # take into account that final value might be <0
+        payoff_month = len(down_sampled_principal) - 1
 
         return {
-            "current_principal_list": current_principal_list,
+            "visual_principal_list": down_sampled_principal,
             "total_interest": total_interest,
             "payoff_month": payoff_month
         }
