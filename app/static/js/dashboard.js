@@ -79,10 +79,10 @@ function collectData() {
         
         
         // 3. UPDATE THE STAT CARDS
-        // I'm assuming you have an ID for your interest saved display
-        const savedElement = document.getElementById('interest-saved-val');
-        if (savedElement) {
-            savedElement.innerText = `$${data.interest_saved.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        const basePaymentFrequency = document.getElementById('base-frequency-payment-val');
+        if (basePaymentFrequency) {
+            basePaymentFrequency.innerText = `$${data.base_payment_amount.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+
         }
     })
     .catch(error => {

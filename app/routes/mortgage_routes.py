@@ -36,7 +36,12 @@ def calculate_mortgage():
     return jsonify({
         "status": "success",
         "message": f"Python received {len(event_data)} blocks",
+        
+        #base return numbers
         "base_principal": base['visual_principal_list'],
-        "scenario_principal": scenario['visual_principal_list']
+        "base_payment_amount": base['frequency_payment'],
+
+        #scenario return numbers
+        "scenario_principal": scenario['visual_principal_list'],
 
     })
