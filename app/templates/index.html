@@ -11,42 +11,46 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Mortgage Lab</h2>
+                <div id="scenario-tabs" style="display: flex; gap: 5px; margin-bottom: 10px;">
+                    <button class="tab-btn active" onclick="switchScenario(0)">S1</button>
+                    <button onclick="addScenario()" title="Add new comparison scenario">➕ Add</button>
+                </div>
+                
                 <button onclick="addBlock('Lump Sum')">➕ Lump Sum</button>
                 <button onclick="addBlock('Payment Change')">➕ Payment Change</button>
                 <button onclick="addBlock('Rate Change')">➕ Rate Change</button>
                 <button onclick="collectData()" class="calc-btn">🚀 Calculate</button>
             </div>
 
-            <div id="block-container" class="block-stack">
-                <div class="block base">
-                    <div style="display: flex; justify-content: space-between;">
+            <div id="scenario-wrapper" class="block-stack">
+                <div id="scenario-0" class="scenario-container">
+                    <div class="block base">
                         <strong>Base Mortgage</strong>
-                    </div>
-                    <div style="margin-top:10px;">
-                        <label>Principal:</label>
-                        <input type="number" class="base-principal" placeholder="$500,000" style="width:80px">
-                    </div>
-                    <div style="margin-top:10px;">
-                        <label>Amortization Years:</label>
-                        <input type="number" class="base-amortization" placeholder="30" style="width:80px">
-                    </div>
-                    <div style="margin-top:10px;">
-                        <label>Interest Rate:</label>
-                        <input type="number" class="base-interest" placeholder="5.00%" style="width:80px">
-                    </div>
-                    <div style="margin-top:10px;">
-                        <label for="payment_schedule">Payment Schedule:</label>
-                        <select name="payment_schedule" id="payment_schedule" class="base-payment" placeholder="Monthly" style="width:80px">
-                            <option value="monthly">Monthly</option>
-                            <option value="semi_monthly">Semi Monthly</option>
-                            <option value="bi_weekly">Bi Weekly</option>
-                            <option value="acc_bi_weekly">Accelerated Bi Weekly</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="acc_weekly">Accelerated Weekly</option>
-                        </select>
+                        <div style="margin-top:10px;">
+                            <label>Principal:</label>
+                            <input type="number" class="base-principal" placeholder="$500,000" style="width:80px">
+                        </div>
+                        <div style="margin-top:10px;">
+                            <label>Amortization Years:</label>
+                            <input type="number" class="base-amortization" placeholder="30" style="width:80px">
+                        </div>
+                        <div style="margin-top:10px;">
+                            <label>Interest Rate:</label>
+                            <input type="number" class="base-interest" placeholder="5.00%" style="width:80px">
+                        </div>
+                        <div style="margin-top:10px;">
+                            <label>Schedule:</label>
+                            <select class="base-payment" style="width:80px">
+                                <option value="monthly">Monthly</option>
+                                <option value="semi_monthly">Semi Monthly</option>
+                                <option value="bi_weekly">Bi Weekly</option>
+                                <option value="acc_bi_weekly">Acc. Bi Weekly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="acc_weekly">Acc. Weekly</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                    
             </div>
         </aside>
 
