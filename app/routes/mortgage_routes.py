@@ -11,37 +11,23 @@ def main_screen():
 
 @mortgage_routes.route('/calculate', methods=['POST'])
 def calculate_mortgage():
-    # 1. Receive data from front end
-    event_data = request.get_json()
+    scenarios_data = request.get_json() # This is now our list of {base: {}, events: []}
+    results = []
 
-    print()
-    # 2. create instance of "base" mortgage
-    my_mortgage = AmortizationService(
-        principal_start= event_data[0]['principal'],
-        amortization_years= event_data[0]['amortization'],
-        interest_rate= event_data[0]['interest'],
-        payment_frequency= event_data[0]['payment']
-    )
+    for item in scenarios_data:
+        # Each 'item' contains its own base settings and its own event blocks
+        service = AmortizationService(
+            principal_start=item['base']['principal'],
+            amortization_years=item['base']['amortization'],
+            interest_rate=item['base']['interest'],
+            payment_frequency=item['base']['payment']
+        )
+        
+        # Calculate using the blocks specific to THIS scenario
+        res = service._calculate_amortization_table(event_data=item['events'])
+        results.append(res)
 
-    # 3. capture base information 
-    base = my_mortgage.amortization_table 
-
-    # slice out data related to base mortgage
-    event_data = event_data[1:]
-
-    # 4. run a secondary scenario with blocks included
-    scenario = my_mortgage._calculate_amortization_table(event_data=event_data)
-
-    # 5. Pass the response back to front end
     return jsonify({
         "status": "success",
-        "message": f"Python received {len(event_data)} blocks",
-        
-        #base return numbers
-        "base_principal": base['visual_principal_list'],
-        "base_payment_amount": base['frequency_payment'],
-
-        #scenario return numbers
-        "scenario_principal": scenario['visual_principal_list'],
-
+        "scenarios": results # The list of dicts that updateChart() now expects
     })

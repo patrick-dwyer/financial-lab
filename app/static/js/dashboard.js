@@ -1,90 +1,114 @@
 // variable to hold the chart instance
 let mortgageChart = null;
+let scenarios = [{ id: 0 }]; // Track active scenarios
+let activeScenarioIndex = 0;
 
-function collectData() {
-    console.log("Calculate clicked - gathering data from blocks...");
-    const container = document.getElementById('block-container');
-    const blocks = Array.from(container.getElementsByClassName('block'));
+function addScenario() {
+    const newIndex = scenarios.length;
+    const currentContainer = document.getElementById(`scenario-${activeScenarioIndex}`);
+    
+    // 1. Perform the clone
+    const newContainer = currentContainer.cloneNode(true);
+    newContainer.id = `scenario-${newIndex}`;
+    newContainer.style.display = 'none';
 
-    // Create an empty list to store our cleaned-up data
-    const eventData = [];
-
-    blocks.forEach(block => {
-        
-        // Base mortgage calculations
-        if (block.classList.contains('base')) {
-
-            // extract values from base mortgage block
-            const type = block.querySelector('strong').innerText;
-            let principal = block.querySelector('.base-principal').value;
-            let amortization = block.querySelector('.base-amortization').value;
-            let interest = block.querySelector('.base-interest').value;
-            let payment = block.querySelector('.base-payment').value;
-
-            // convert whole number interst to decimal for calculations
-            interest = interest / 100
-
-            // Only add to block data if all fields completed
-            if (type && principal && amortization && interest && payment) {
-                eventData.push({
-                    type: type,
-                    principal: parseFloat(principal),
-                    amortization: parseFloat(amortization),
-                    interest: parseFloat(interest),
-                    payment: payment
-                })
-            }
-
-        } else {
-            // Find the type (Lump Sum or Rate Change) from the <strong> tag
-            const type = block.querySelector('strong').innerText;
-
-            // Extract values from the specific inputs we built earlier
-            const month = block.querySelector('.block-month').value;
-            let value = block.querySelector('.block-amount').value;
-
-            // Only add to our list if the user actually typed something
-            if (month && value) {            
-
-                if (type === "Rate Change") {
-                    value = value / 100
-                }
-
-                eventData.push({
-                    type: type,
-                    month: parseInt(month),
-                    value: parseFloat(value)
-                });
-            }
-
-        };        
+    // 2. MANUAL VALUE SYNC: cloneNode doesn't copy current input values
+    const currentInputs = currentContainer.querySelectorAll('input, select');
+    const newInputs = newContainer.querySelectorAll('input, select');
+    
+    currentInputs.forEach((input, i) => {
+        newInputs[i].value = input.value;
     });
 
-    // --- THE HANDSHAKE START ---
+    document.getElementById('scenario-wrapper').appendChild(newContainer);
+    
+    // Create the Tab button
+    const tabBtn = document.createElement('button');
+    tabBtn.className = 'tab-btn';
+    tabBtn.innerText = `S${newIndex + 1}`;
+    tabBtn.onclick = () => switchScenario(newIndex);
+    
+    const tabsArea = document.getElementById('scenario-tabs');
+    tabsArea.insertBefore(tabBtn, tabsArea.lastElementChild);
+    
+    scenarios.push({ id: newIndex });
+}
+
+function switchScenario(index) {
+    // 1. Hide all scenario containers and show the selected one
+    scenarios.forEach((s, i) => {
+        const container = document.getElementById(`scenario-${i}`);
+        if (container) {
+            container.style.display = (i === index) ? 'flex' : 'none';
+        }
+    });
+
+    // 2. Update the activeScenarioIndex so addBlock knows where to go
+    activeScenarioIndex = index;
+
+    // 3. Toggle the "active" class on the tab buttons
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs.forEach((btn, i) => {
+        if (i === index) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+function collectData() {
+    // Loop through every scenario container
+    const payload = scenarios.map((scenario, index) => {
+        const container = document.getElementById(`scenario-${index}`);
+        const blocks = Array.from(container.getElementsByClassName('block'));
+        
+        let baseSettings = {};
+        const eventBlocks = [];
+
+        blocks.forEach(block => {
+            if (block.classList.contains('base')) {
+                // Extract base mortgage settings
+                baseSettings = {
+                    principal: parseFloat(block.querySelector('.base-principal').value),
+                    amortization: parseFloat(block.querySelector('.base-amortization').value),
+                    interest: parseFloat(block.querySelector('.base-interest').value) / 100,
+                    payment: block.querySelector('.base-payment').value
+                };
+            } else {
+                // Extract event blocks (Lump sums, etc.)
+                eventBlocks.push({
+                    type: block.querySelector('strong').innerText,
+                    month: parseInt(block.querySelector('.block-month').value),
+                    value: parseFloat(block.querySelector('.block-amount').value)
+                });
+            }
+        });
+        return { base: baseSettings, events: eventBlocks };
+    });
+
+    // Send the list of scenarios to Python
     fetch('/calculate', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(eventData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
     })
     .then(response => response.json())
     .then(data => {
-        // 1. Log the result so we can see it in the console
-        console.log("Python Calculation Result:", data);
+    console.log("Python Calculation Result:", data);
+    
+    if (data.status === "success") {
+        // Pass the entire list of scenarios to the chart
+        updateChart(data.scenarios); 
         
-        // 2. TRIGGER THE VISUALS
-        // Make sure these names match exactly what Python sends back in jsonify()
-        updateChart(data.base_principal, data.scenario_principal);
-        
-        
-        // 3. UPDATE THE STAT CARDS
+        // Update the stat card for the FIRST scenario (S1)
         const basePaymentFrequency = document.getElementById('base-frequency-payment-val');
-        if (basePaymentFrequency) {
-            basePaymentFrequency.innerText = `$${data.base_payment_amount.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-
+        if (basePaymentFrequency && data.scenarios.length > 0) {
+            const firstScenario = data.scenarios[0];
+            basePaymentFrequency.innerText = `$${firstScenario.frequency_payment.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         }
-    })
+    }
+})
     .catch(error => {
         console.error('Handshake failed:', error);
     });
@@ -95,7 +119,9 @@ function collectData() {
 }
 
 function addBlock(type) {
-    const container = document.getElementById('block-container');
+    // Target the active scenario container
+    const container = document.getElementById(`scenario-${activeScenarioIndex}`);
+    
     const newBlock = document.createElement('div');
     newBlock.className = 'block';
     
@@ -110,6 +136,7 @@ function addBlock(type) {
         placeholder = "$";
     }
     
+    // Updated button to include sortBlocks()
     newBlock.innerHTML = `
         <div style="display: flex; justify-content: space-between;">
             <strong>${type}</strong>
@@ -130,10 +157,10 @@ function addBlock(type) {
 }
 
 function sortBlocks() {
-    const container = document.getElementById('block-container');
+    // Only sort the blocks for the active scenario
+    const container = document.getElementById(`scenario-${activeScenarioIndex}`);
     const blocks = Array.from(container.getElementsByClassName('block'));
 
-    // Keep the "Base Mortgage" at the very top
     const baseBlock = blocks.find(b => b.classList.contains('base'));
     const dynamicBlocks = blocks.filter(b => !b.classList.contains('base'));
 
@@ -143,66 +170,56 @@ function sortBlocks() {
         return valA - valB;
     });
 
+    // Re-append only to the active container
     container.innerHTML = '';
     if (baseBlock) container.appendChild(baseBlock);
     dynamicBlocks.forEach(block => container.appendChild(block));
 }
 
-function updateChart(baseBalances, scenarioBalances) {
+function updateChart(scenarioResults) {
     const ctx = document.getElementById('mortgageChart').getContext('2d');
+    if (mortgageChart) { mortgageChart.destroy(); }
 
-    // if chart already exists, destroy it before making a new one
-    if (mortgageChart) {
-        mortgageChart.destroy();
-    }
-
-    // 3. Create X-axis labels (Month 0, 1, 2, 3...)
-    const maxMonths = Math.max(baseBalances.length, scenarioBalances.length);
+    // 1. Determine the longest timeline among all scenarios
+    const maxMonths = Math.max(...scenarioResults.map(s => s.visual_principal_list.length));
     const labels = Array.from({length: maxMonths}, (_, i) => i);
+
+    // 2. Define a set of colors for different scenarios
+    const colors = [
+        { border: '#4bc0c0', bg: 'rgba(75, 192, 192, 0.1)' }, // Teal (S1)
+        { border: '#ff6384', bg: 'rgba(255, 99, 132, 0.1)' }, // Pink (S2)
+        { border: '#36a2eb', bg: 'rgba(54, 162, 235, 0.1)' }, // Blue (S3)
+        { border: '#ffce56', bg: 'rgba(255, 206, 86, 0.1)' }  // Yellow (S4)
+    ];
+
+    // 3. Map the scenario results into Chart.js datasets
+    const datasets = scenarioResults.map((result, index) => {
+        const color = colors[index % colors.length]; // Cycle colors if > 4 scenarios
+        return {
+            label: `Scenario ${index + 1}`,
+            data: result.visual_principal_list,
+            borderColor: color.border,
+            backgroundColor: color.bg,
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: true
+        };
+    });
 
     // 4. Initialize the Chart
     mortgageChart = new Chart(ctx, {
         type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Original Mortgage',
-                    data: baseBalances,
-                    borderColor: 'rgba(75, 192, 192, 1)', // Teal
-                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                    borderWidth: 2,
-                    pointRadius: 0, // Hides dots for a clean line
-                    fill: true
-                },
-                {
-                    label: 'With Blocks',
-                    data: scenarioBalances,
-                    borderColor: 'rgba(255, 99, 132, 1)', // Pink/Red
-                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    fill: true
-                }
-            ]
-        },
+        data: { labels: labels, datasets: datasets },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // allows chart to fill full container height
+            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true,
-                    min: 0,
-                    ticks: {
-                        callback: function(value) {
-                            return '$' + value.toLocaleString();
-                        }
-                    },
+                    ticks: { callback: (value) => '$' + value.toLocaleString() },
                     title: { display: true, text: 'Remaining Principal ($)' }
                 },
-                x: {
-                    title: { display: true, text: 'Month' }
-                }
+                x: { title: { display: true, text: 'Month' } }
             }
         }
     });
