@@ -76,11 +76,15 @@ function collectData() {
                     payment: block.querySelector('.base-payment').value
                 };
             } else {
-                // Extract event blocks (Lump sums, etc.)
+                // Extract event block type and value
+                const type = block.querySelector('strong').innerText
+                const month = parseInt(block.querySelector('.block-month').value)
+                let rawValue = parseFloat(block.querySelector('.block-amount').value)
+
                 eventBlocks.push({
-                    type: block.querySelector('strong').innerText,
-                    month: parseInt(block.querySelector('.block-month').value),
-                    value: parseFloat(block.querySelector('.block-amount').value)
+                    type: type,
+                    month: month,
+                    value: type === "Rate Change" ? rawValue / 100 : rawValue
                 });
             }
         });
