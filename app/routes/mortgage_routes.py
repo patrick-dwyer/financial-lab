@@ -13,6 +13,7 @@ def main_screen():
 def calculate_mortgage():
     scenarios_data = request.get_json() # This is now our list of {base: {}, events: []}
     results = []
+    print(scenarios_data)
 
     for item in scenarios_data:
         # Each 'item' contains its own base settings and its own event blocks
@@ -24,6 +25,7 @@ def calculate_mortgage():
         )
         
         # Calculate using the blocks specific to THIS scenario
+        print(item)
         res = service._calculate_amortization_table(event_data=item['events'])
         results.append(res)
 
