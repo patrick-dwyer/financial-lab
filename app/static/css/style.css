@@ -1,19 +1,32 @@
-.dashboard {
-    display: flex;
-    height: 100vh;
-    background-color: #121212;
-    color: white;
-    font-family: sans-serif;
+/* Reset and Base Styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-/* Sidebar is the Control Center */
+body {
+    background-color: #121212; /* Deep background for the whole page */
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.dashboard {
+    display: flex;
+    min-height: 100vh; /* Allow it to grow, but at least cover the screen */
+}
+
+/* Sidebar: Control Center */
 .sidebar {
-    width: 350px; /* Fixed width for the stack */
+    width: 350px;
+    background: #1a1a1a; /* Slightly lighter than the main background */
     border-right: 1px solid #333;
     display: flex;
     flex-direction: column;
     padding: 20px;
-    background: #1a1a1a;
+    position: sticky; /* Keeps controls visible while scrolling results */
+    top: 0;
+    height: 100vh;
 }
 
 .sidebar-header {
@@ -46,19 +59,24 @@
 
 .block.base { border-color: #2ecc71; }
 
-/* Right side for Chart.js */
+/* Results Area: The Main Stage */
 .results-area {
     flex: 1;
     padding: 40px;
+    background: #121212; /* Same as body to remove the "box" effect */
     display: flex;
     flex-direction: column;
+    gap: 30px;
 }
 
+/* Chart Wrapper: Cleaned up the "dashed box" look */
 .chart-wrapper {
-    flex: 1;
-    border: 1px dashed #444;
-    border-radius: 15px;
-    margin-top: 20px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 20px;
+    min-height: 500px; /* Gives the chart a consistent home */
+    width: 100%;
 }
 
 .scenario-container {
