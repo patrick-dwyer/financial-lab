@@ -8,6 +8,8 @@
 </head>
 <body>
     <div class="dashboard">
+        
+        <!-- side bar -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Mortgage Lab</h2>
@@ -21,7 +23,8 @@
                 <button onclick="addBlock('Rate Change')">➕ Rate Change</button>
                 <button onclick="collectData()" class="calc-btn">🚀 Calculate</button>
             </div>
-
+            
+            <!-- side bar blocks -->
             <div id="scenario-wrapper" class="block-stack">
                 <div id="scenario-0" class="scenario-container">
                     <div class="block base">
@@ -54,10 +57,31 @@
             </div>
         </aside>
 
+        <!-- right hand side results area -->
         <main class="results-area">
+            
+            <!-- chart area -->
             <div class="chart-wrapper">
                 <canvas id="mortgageChart"></canvas>
-                </div>
+            </div>
+            
+            <!-- summary table -->
+            <div class="analysis-section" style="margin-top: 30px; background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid #333;">
+                <h3 style="color: #2ecc71; margin-bottom: 20px;">Scenario Cost Summary</h3>
+                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #333; color: #bbb; font-size: 0.9em;">
+                            <th style="padding: 12px;">Scenario</th>
+                            <th>Total Interest Paid</th>
+                            <th>Time to Payoff</th>
+                            <th>Total Lifetime Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparison-table-body">
+                        </tbody>
+                </table>
+            </div>
+
         </main>    
     </div>
 
