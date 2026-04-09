@@ -55,6 +55,11 @@ function switchScenario(index) {
             btn.classList.remove('active');
         }
     });
+
+    // refresh results to reflect user choice for highlight
+    if (window.lastResults) {
+        updateComparisonTable(window.lastResults);
+    }
 }
 
 function collectData() {
@@ -99,18 +104,12 @@ function collectData() {
     })
     .then(response => response.json())
     .then(data => {
-    console.log("Python Calculation Result:", data);
     
     if (data.status === "success") {
         // Pass the entire list of scenarios to the chart
-        updateChart(data.scenarios); 
-        
-        // Update the stat card for the FIRST scenario (S1)
-        const basePaymentFrequency = document.getElementById('base-frequency-payment-val');
-        if (basePaymentFrequency && data.scenarios.length > 0) {
-            const firstScenario = data.scenarios[0];
-            basePaymentFrequency.innerText = `$${firstScenario.frequency_payment.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-        }
+        updateChart(data.scenarios);
+        window.lastResults = data.scenarios; // Store results so we can refresh on tab switch
+        updateComparisonTable(data.scenarios);
     }
 })
     .catch(error => {
@@ -226,5 +225,38 @@ function updateChart(scenarioResults) {
                 x: { title: { display: true, text: 'Month' } }
             }
         }
+    });
+}
+
+// function to update summary table of scenarios
+function updateComparisonTable(scenarioResults) {
+    const tableBody = document.getElementById('comparison-table-body');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = ''; // Clear old data
+
+    scenarioResults.forEach((result, index) => {
+        // Calculate variables
+        const initialPrincipal = result.visual_principal_list[0];
+        const totalInterest = result.total_interest;
+        const totalCost = initialPrincipal + totalInterest;
+        
+        const years = Math.floor(result.payoff_month / 12);
+        const months = result.payoff_month % 12;
+        const timeString = `${years}y ${months}m`;
+
+        // Check if this is the scenario currently selected in the sidebar
+        const isActive = (index === activeScenarioIndex);
+        const rowStyle = isActive ? 'background: #252525; border-left: 4px solid #2ecc71;' : '';
+
+        const row = `
+            <tr style="border-bottom: 1px solid #333; ${rowStyle}">
+                <td style="padding: 15px; font-weight: bold;">Scenario ${index + 1}</td>
+                <td style="color: #ff6384;">$${totalInterest.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td>${timeString}</td>
+                <td style="color: #2ecc71; font-weight: bold;">$${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+            </tr>
+        `;
+        tableBody.insertAdjacentHTML('beforeend', row);
     });
 }
