@@ -135,7 +135,7 @@ function addBlock(type) {
         label = "New Percent:";
         placeholder = "%";
     } else if (type === "Payment Change") {
-        label = "New Monthly:";
+        label = "Payment Amount:";
         placeholder = "$";
     }
     
