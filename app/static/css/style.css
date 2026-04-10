@@ -1,4 +1,15 @@
-/* Reset and Base Styles */
+/* 1. VARIABLES & RESETS */
+:root {
+    --bg-dark: #121212;
+    --card-bg: #1a1a1a;
+    --accent: #2ecc71;
+    --accent-hover: #27ae60;
+    --border-color: #333;
+    --text-main: #ffffff;
+    --text-dim: #bbbbbb;
+    --nav-height: 60px;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -6,48 +17,106 @@
 }
 
 body {
-    background-color: #121212; /* Deep background for the whole page */
-    color: white;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden; /* Prevents the whole page from scrolling */
 }
 
+/* 2. GLOBAL LAYOUT (Top Nav & Wrapper) */
+.top-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--nav-height);
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    z-index: 2000; /* Stays above everything */
+}
+
+.nav-logo { font-weight: bold; font-size: 1.2rem; letter-spacing: 1px; }
+.nav-logo span { color: var(--accent); }
+
+.nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    margin-left: 20px;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--accent); }
+
+.content-wrapper {
+    margin-top: var(--nav-height);
+    width: 100%;
+}
+
+/* 3. DASHBOARD FRAMEWORK (Mortgage Lab Page) */
 .dashboard {
     display: flex;
-    min-height: 100vh; /* Allow it to grow, but at least cover the screen */
+    height: calc(100vh - var(--nav-height));
+    width: 100%;
 }
 
-/* Sidebar: Control Center */
 .sidebar {
     width: 350px;
-    background: #1a1a1a; /* Slightly lighter than the main background */
-    border-right: 1px solid #333;
+    background: var(--card-bg);
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     padding: 20px;
-    position: sticky; /* Keeps controls visible while scrolling results */
-    top: 0;
-    height: 100vh;
+    height: 100%;
+    overflow-y: auto; /* Independent scroll for inputs */
 }
 
-.sidebar-header {
-    margin-bottom: 20px;
-}
-
-.sidebar-header button {
-    margin: 5px 0;
-    width: 100%;
-    padding: 10px;
-    cursor: pointer;
-}
-
-/* THE STACK: This makes blocks go Top-to-Bottom */
-.block-stack {
+.results-area {
     flex: 1;
-    overflow-y: auto; /* Scroll vertically if there are many blocks */
+    padding: 40px;
+    height: 100%;
+    overflow-y: auto; /* Independent scroll for charts/tables */
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* 4. COMPONENTS (Home Page Cards) */
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 40px;
+}
+
+.tool-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 30px;
+    transition: transform 0.2s, border-color 0.2s;
+    text-decoration: none;
+    color: var(--text-main);
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+}
+
+.tool-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 5. COMPONENTS (Mortgage Blocks & UI) */
+.block-stack {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    padding-right: 10px;
 }
 
 .block {
@@ -57,39 +126,20 @@ body {
     padding: 15px;
 }
 
-.block.base { border-color: #2ecc71; }
+.block.base { border-color: var(--accent); }
 
-/* Results Area: The Main Stage */
-.results-area {
-    flex: 1;
-    padding: 40px;
-    background: #121212; /* Same as body to remove the "box" effect */
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
-/* Chart Wrapper: Cleaned up the "dashed box" look */
 .chart-wrapper {
-    background: #1a1a1a;
-    border: 1px solid #333;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 12px;
     padding: 20px;
-    min-height: 500px; /* Gives the chart a consistent home */
+    min-height: 500px;
     width: 100%;
 }
 
-.scenario-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px; /* Keeps the space between blocks */
-    width: 100%;
-}
-
-/* Base style for all tab buttons */
 .tab-btn {
     background: #333;
-    color: #bbb;
+    color: var(--text-dim);
     border: 1px solid #444;
     padding: 5px 12px;
     cursor: pointer;
@@ -97,16 +147,114 @@ body {
     transition: all 0.2s ease;
 }
 
-/* The Highlighted State */
 .tab-btn.active {
-    background: #2ecc71; /* A nice green to match your "Base" block */
+    background: var(--accent);
     color: white;
-    border-color: #27ae60;
+    border-color: var(--accent-hover);
     font-weight: bold;
-    box-shadow: 0 0 8px rgba(46, 204, 113, 0.4);
 }
 
-.tab-btn:hover:not(.active) {
-    background: #444;
+.calc-btn {
+    background: var(--accent);
     color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.calc-btn:hover { background: var(--accent-hover); }
+
+/* */
+
+/* Sidebar Header & Action Buttons */
+.sidebar-header h2 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: var(--accent);
+}
+
+.sidebar-header button {
+    display: block;
+    width: 100%;
+    background: #333;
+    color: white;
+    border: 1px solid #444;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.sidebar-header button:hover {
+    background: #444;
+    border-color: var(--accent);
+}
+
+/* The primary Calculate button should stand out */
+.sidebar-header .calc-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 15px;
+    padding: 12px;
+}
+
+.sidebar-header .calc-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+}
+
+/* Tab button container tweak */
+#scenario-tabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+#scenario-tabs button {
+    width: auto; /* Overwrite the block display for tabs */
+    margin-bottom: 0;
+}
+
+/* This ensures blocks inside a scenario stack top-to-bottom */
+.scenario-container {
+    display: flex;
+    flex-direction: column; 
+    gap: 15px; /* Space between the blocks */
+    width: 100%;
+}
+
+/* Ensure the wrapper allows the blocks to grow and be scrollable */
+.block-stack {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-right: 5px; /* Space for the scrollbar */
+}
+
+.block div {
+    margin-bottom: 10px;
+}
+
+.block div:last-child {
+    margin-bottom: 0;
+}
+
+.block label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-bottom: 4px;
 }

@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="hero">
+    <h1>Welcome to your Financial Lab</h1>
+    <p>Select a tool below to begin your home ownership planning.</p>
+</section>
+
+<div class="tool-grid">
+    <a href="/mortgage-lab" class="tool-card">
+        <h3>Mortgage Simulator</h3>
+        <p>Compare scenarios, accelerated payments, and interest savings visually.</p>
+        <span class="status-tag">Active</span>
+    </a>
+    
+    <div class="tool-card disabled">
+        <h3>Rent vs Buy</h3>
+        <p>Analyze the opportunity cost of renting vs building equity.</p>
+        <span class="status-tag">Coming Soon</span>
+    </div>
+</div>
+{% endblock %}

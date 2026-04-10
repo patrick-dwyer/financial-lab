@@ -6,8 +6,12 @@ mortgage_routes = Blueprint('mortgage_routes', __name__)
 
 
 @mortgage_routes.route('/')
-def main_screen():
-    return render_template('index.html')
+def home_screen():
+    return render_template('home.html')
+
+@mortgage_routes.route('/mortgage-lab')
+def mortgage_lab_screen():
+    return render_template('mortgage-lab.html')
 
 @mortgage_routes.route('/calculate', methods=['POST'])
 def calculate_mortgage():
