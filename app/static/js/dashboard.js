@@ -1,37 +1,48 @@
-// variable to hold the chart instance
-let mortgageChart = null;
-let scenarios = [{ id: 0 }]; // Track active scenarios
-let activeScenarioIndex = 0;
+// Dashboard javascript logic for mortgage lab. Includes the following functions:
+// - addScenario: add a new scenario to compare to existing scenarios
+// - switchScenario: highlight  which scenario is currently selected on screen and show details of that scenario in sidebar
+// - collectData: take user input details (base mortgage + any blocks) and send/receive data to/from Python backend
+// - addBlock: add a new block to the scenario to impact outcome of calculations
+// - sortBlocks: sort blocks for scenario based on month in descending order
+// - updateChart: ensure chart is updated with all scenarios plotted
+// - updateComparisonTable: update comparison table with all scenarios for their columns
+
+let mortgageChart = null; // variable to hold the chart instance
+let scenarios = [{ id: 0 }]; // track active scenarios
+let activeScenarioIndex = 0; // default to scenario 1
 
 function addScenario() {
-    const newIndex = scenarios.length;
-    const currentContainer = document.getElementById(`scenario-${activeScenarioIndex}`);
+
+    const newIndex = scenarios.length; // determine how many scenarios are present
+    const currentContainer = document.getElementById(`scenario-${activeScenarioIndex}`); // find current scenario
     
     // 1. Perform the clone
-    const newContainer = currentContainer.cloneNode(true);
-    newContainer.id = `scenario-${newIndex}`;
-    newContainer.style.display = 'none';
+    const newContainer = currentContainer.cloneNode(true); // clone scneario with same features
+    newContainer.id = `scenario-${newIndex}`; // provide new unique id number based on scenario number
+    newContainer.style.display = 'none'; // hide it initially, do not force it to open
 
-    // 2. MANUAL VALUE SYNC: cloneNode doesn't copy current input values
-    const currentInputs = currentContainer.querySelectorAll('input, select');
-    const newInputs = newContainer.querySelectorAll('input, select');
+    // 2. Manual sync value
+    const currentInputs = currentContainer.querySelectorAll('input, select'); // copy input values as selected scneario
+    const newInputs = newContainer.querySelectorAll('input, select'); // make list of all empty values of new scenario
     
+    // loop to replace all new values with current scenario values
     currentInputs.forEach((input, i) => {
         newInputs[i].value = input.value;
     });
 
-    document.getElementById('scenario-wrapper').appendChild(newContainer);
+
+    document.getElementById('scenario-wrapper').appendChild(newContainer); // add to sidebar as last child of element
     
     // Create the Tab button
-    const tabBtn = document.createElement('button');
-    tabBtn.className = 'tab-btn';
-    tabBtn.innerText = `S${newIndex + 1}`;
-    tabBtn.onclick = () => switchScenario(newIndex);
+    const tabBtn = document.createElement('button'); // make button element
+    tabBtn.className = 'tab-btn'; // give class name
+    tabBtn.innerText = `S${newIndex + 1}`; // provide visual name with current number
+    tabBtn.onclick = () => switchScenario(newIndex); // button click activates switchScenario function
     
-    const tabsArea = document.getElementById('scenario-tabs');
-    tabsArea.insertBefore(tabBtn, tabsArea.lastElementChild);
+    const tabsArea = document.getElementById('scenario-tabs'); // get list of all current tabs
+    tabsArea.insertBefore(tabBtn, tabsArea.lastElementChild); // place new scenario button to far right side
     
-    scenarios.push({ id: newIndex });
+    scenarios.push({ id: newIndex }); //add new scenario to scenario list
 }
 
 function switchScenario(index) {
