@@ -7,19 +7,29 @@ mortgage_routes = Blueprint('mortgage_routes', __name__)
 
 @mortgage_routes.route('/')
 def home_screen():
+    '''
+    Main landing page with choices of each tool within the financial lab website.
+    '''
     return render_template('home.html')
 
 @mortgage_routes.route('/mortgage-lab')
 def mortgage_lab_screen():
+    '''
+    Mortgage lab tool route.
+    '''
     return render_template('mortgage-lab.html')
 
 @mortgage_routes.route('/calculate', methods=['POST'])
 def calculate_mortgage():
+    '''
+    Route used to calculate mortgage for mortgage lab tool. Returns JSON response from calculations.
+    '''
     scenarios_data = request.get_json() # This is now our list of {base: {}, events: []}
     results = []
-    print(scenarios_data)
 
+    # for loop to calculate each scenario
     for item in scenarios_data:
+
         # Each 'item' contains its own base settings and its own event blocks
         service = AmortizationService(
             principal_start=item['base']['principal'],
@@ -29,7 +39,6 @@ def calculate_mortgage():
         )
         
         # Calculate using the blocks specific to THIS scenario
-        print(item)
         res = service._calculate_amortization_table(event_data=item['events'])
         results.append(res)
 

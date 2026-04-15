@@ -1,37 +1,48 @@
-// variable to hold the chart instance
-let mortgageChart = null;
-let scenarios = [{ id: 0 }]; // Track active scenarios
-let activeScenarioIndex = 0;
+// Dashboard javascript logic for mortgage lab. Includes the following functions:
+// - addScenario: add a new scenario to compare to existing scenarios
+// - switchScenario: highlight  which scenario is currently selected on screen and show details of that scenario in sidebar
+// - collectData: take user input details (base mortgage + any blocks) and send/receive data to/from Python backend
+// - addBlock: add a new block to the scenario to impact outcome of calculations
+// - sortBlocks: sort blocks for scenario based on month in descending order
+// - updateChart: ensure chart is updated with all scenarios plotted
+// - updateComparisonTable: update comparison table with all scenarios for their columns
+
+let mortgageChart = null; // variable to hold the chart instance
+let scenarios = [{ id: 0 }]; // track active scenarios
+let activeScenarioIndex = 0; // default to scenario 1
 
 function addScenario() {
-    const newIndex = scenarios.length;
-    const currentContainer = document.getElementById(`scenario-${activeScenarioIndex}`);
+
+    const newIndex = scenarios.length; // determine how many scenarios are present
+    const currentContainer = document.getElementById(`scenario-${activeScenarioIndex}`); // find current scenario
     
     // 1. Perform the clone
-    const newContainer = currentContainer.cloneNode(true);
-    newContainer.id = `scenario-${newIndex}`;
-    newContainer.style.display = 'none';
+    const newContainer = currentContainer.cloneNode(true); // clone scneario with same features
+    newContainer.id = `scenario-${newIndex}`; // provide new unique id number based on scenario number
+    newContainer.style.display = 'none'; // hide it initially, do not force it to open
 
-    // 2. MANUAL VALUE SYNC: cloneNode doesn't copy current input values
-    const currentInputs = currentContainer.querySelectorAll('input, select');
-    const newInputs = newContainer.querySelectorAll('input, select');
+    // 2. Manual sync value
+    const currentInputs = currentContainer.querySelectorAll('input, select'); // copy input values as selected scneario
+    const newInputs = newContainer.querySelectorAll('input, select'); // make list of all empty values of new scenario
     
+    // loop to replace all new values with current scenario values
     currentInputs.forEach((input, i) => {
         newInputs[i].value = input.value;
     });
 
-    document.getElementById('scenario-wrapper').appendChild(newContainer);
+
+    document.getElementById('scenario-wrapper').appendChild(newContainer); // add to sidebar as last child of element
     
     // Create the Tab button
-    const tabBtn = document.createElement('button');
-    tabBtn.className = 'tab-btn';
-    tabBtn.innerText = `S${newIndex + 1}`;
-    tabBtn.onclick = () => switchScenario(newIndex);
+    const tabBtn = document.createElement('button'); // make button element
+    tabBtn.className = 'tab-btn'; // give class name
+    tabBtn.innerText = `S${newIndex + 1}`; // provide visual name with current number
+    tabBtn.onclick = () => switchScenario(newIndex); // button click activates switchScenario function
     
-    const tabsArea = document.getElementById('scenario-tabs');
-    tabsArea.insertBefore(tabBtn, tabsArea.lastElementChild);
+    const tabsArea = document.getElementById('scenario-tabs'); // get list of all current tabs
+    tabsArea.insertBefore(tabBtn, tabsArea.lastElementChild); // place new scenario button to far right side
     
-    scenarios.push({ id: newIndex });
+    scenarios.push({ id: newIndex }); //add new scenario to scenario list
 }
 
 function switchScenario(index) {
@@ -63,13 +74,14 @@ function switchScenario(index) {
 }
 
 function collectData() {
+    
     // Loop through every scenario container
     const payload = scenarios.map((scenario, index) => {
-        const container = document.getElementById(`scenario-${index}`);
-        const blocks = Array.from(container.getElementsByClassName('block'));
+        const container = document.getElementById(`scenario-${index}`); // make container for scenario
+        const blocks = Array.from(container.getElementsByClassName('block')); // create block arrray for each scenario
         
-        let baseSettings = {};
-        const eventBlocks = [];
+        let baseSettings = {}; // empty object for base
+        const eventBlocks = []; // empty array for blocks
 
         blocks.forEach(block => {
             if (block.classList.contains('base')) {
@@ -86,13 +98,15 @@ function collectData() {
                 const month = parseInt(block.querySelector('.block-month').value)
                 let rawValue = parseFloat(block.querySelector('.block-amount').value)
 
+                // push block values to block array eventBlocks
                 eventBlocks.push({
                     type: type,
                     month: month,
-                    value: type === "Rate Change" ? rawValue / 100 : rawValue
+                    value: type === "Rate Change" ? rawValue / 100 : rawValue // special case of Rate Change being percent
                 });
             }
         });
+        
         return { base: baseSettings, events: eventBlocks };
     });
 
@@ -102,9 +116,9 @@ function collectData() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
     })
-    .then(response => response.json())
+    .then(response => response.json()) // wait for response from python
     .then(data => {
-    
+    // with the data received, update chart and scenarios table
     if (data.status === "success") {
         // Pass the entire list of scenarios to the chart
         updateChart(data.scenarios);
@@ -125,21 +139,25 @@ function addBlock(type) {
     // Target the active scenario container
     const container = document.getElementById(`scenario-${activeScenarioIndex}`);
     
-    const newBlock = document.createElement('div');
-    newBlock.className = 'block';
+    const newBlock = document.createElement('div'); // make new div
+    newBlock.className = 'block'; // add class name to div
     
+    // default case of Lump Sum
     let label = "Amount:";
     let placeholder = "$";
 
+    // case if Rate Change
     if (type === "Rate Change") {
         label = "New Percent:";
         placeholder = "%";
+
+    // case if Payment Change
     } else if (type === "Payment Change") {
         label = "Payment Amount:";
         placeholder = "$";
     }
     
-    // Updated button to include sortBlocks()
+    // HTML to inject. Includes div for block, sortBlocks() function
     newBlock.innerHTML = `
         <div style="display: flex; justify-content: space-between;">
             <strong>${type}</strong>
@@ -156,17 +174,18 @@ function addBlock(type) {
         </div>
     `;
     
-    container.appendChild(newBlock);
+    container.appendChild(newBlock); // add block to container of blocks for that scenario
 }
 
 function sortBlocks() {
     // Only sort the blocks for the active scenario
-    const container = document.getElementById(`scenario-${activeScenarioIndex}`);
-    const blocks = Array.from(container.getElementsByClassName('block'));
+    const container = document.getElementById(`scenario-${activeScenarioIndex}`); // get active scenario
+    const blocks = Array.from(container.getElementsByClassName('block')); // get array of current blocks
 
-    const baseBlock = blocks.find(b => b.classList.contains('base'));
-    const dynamicBlocks = blocks.filter(b => !b.classList.contains('base'));
+    const baseBlock = blocks.find(b => b.classList.contains('base')); // find base block
+    const dynamicBlocks = blocks.filter(b => !b.classList.contains('base')); // find not base blocks for remainder
 
+    // sort blocks based on month value from subtraction value
     dynamicBlocks.sort((a, b) => {
         const valA = parseInt(a.querySelector('.block-month').value) || 0;
         const valB = parseInt(b.querySelector('.block-month').value) || 0;
@@ -175,13 +194,14 @@ function sortBlocks() {
 
     // Re-append only to the active container
     container.innerHTML = '';
-    if (baseBlock) container.appendChild(baseBlock);
-    dynamicBlocks.forEach(block => container.appendChild(block));
+    if (baseBlock) container.appendChild(baseBlock); // add base block as first
+    dynamicBlocks.forEach(block => container.appendChild(block)); // add sorted blocks
 }
 
 function updateChart(scenarioResults) {
-    const ctx = document.getElementById('mortgageChart').getContext('2d');
-    if (mortgageChart) { mortgageChart.destroy(); }
+        
+    const ctx = document.getElementById('mortgageChart').getContext('2d'); // define canvas area for chart
+    if (mortgageChart) { mortgageChart.destroy(); } // refresh with fresh chart
 
     // 1. Determine the longest timeline among all scenarios
     const maxMonths = Math.max(...scenarioResults.map(s => s.visual_principal_list.length));
@@ -204,7 +224,7 @@ function updateChart(scenarioResults) {
             borderColor: color.border,
             backgroundColor: color.bg,
             borderWidth: 2,
-            pointRadius: 0,
+            pointRadius: 0,// function to update summary table of scenarios
             fill: true
         };
     });
@@ -228,19 +248,22 @@ function updateChart(scenarioResults) {
     });
 }
 
-// function to update summary table of scenarios
 function updateComparisonTable(scenarioResults) {
-    const tableBody = document.getElementById('comparison-table-body');
-    if (!tableBody) return;
 
-    tableBody.innerHTML = ''; // Clear old data
+    const tableBody = document.getElementById('comparison-table-body'); // define comparison table
+    if (!tableBody) return; // check if there is any data for the table
 
+    tableBody.innerHTML = ''; // clear old data
+
+    // look at each scenario loop
     scenarioResults.forEach((result, index) => {
+        
         // Calculate variables
         const initialPrincipal = result.visual_principal_list[0];
         const totalInterest = result.total_interest;
         const totalCost = initialPrincipal + totalInterest;
         
+        // convert months to years
         const years = Math.floor(result.payoff_month / 12);
         const months = result.payoff_month % 12;
         const timeString = `${years}y ${months}m`;
@@ -248,7 +271,8 @@ function updateComparisonTable(scenarioResults) {
         // Check if this is the scenario currently selected in the sidebar
         const isActive = (index === activeScenarioIndex);
         const rowStyle = isActive ? 'background: #252525; border-left: 4px solid #2ecc71;' : '';
-
+        
+        // HTML injection to allow it to be highlighted when scenario selected
         const row = `
             <tr style="border-bottom: 1px solid #333; ${rowStyle}">
                 <td style="padding: 15px; font-weight: bold;">Scenario ${index + 1}</td>

@@ -2,7 +2,7 @@ import pandas as pd
 
 class AmortizationService:
     '''
-    Represents the calculation of a users ammortization of their mortgage.
+    Represents the calculation of a user's amortization of their mortgage.
 
     This class requires:
         - principal_start: the total amount of the mortgage loan
@@ -13,7 +13,7 @@ class AmortizationService:
     Class variables:
         - payment_frequency: describes how many payments are put towards the mortgage each year
         - months_in_a_year: variable used to represent 12 months in a year for calculations
-        - fixed_rate_compounding_periods: in Canada, any fixed rate mortgage only comopunds 2 times a year
+        - fixed_rate_compounding_periods: in Canada, any fixed rate mortgage only compounds 2 times a year
 
     Class methods:
         __init__: initializes core attributes for the AmortizationService object.
@@ -23,9 +23,11 @@ class AmortizationService:
 
     '''
 
-    # dictionary of tuples that include
-    # -payments per year based on frequency of payments at position 0
-    # -factor based on number payment months / number of payments
+    '''
+    payment_frequency dictionary: tuples that include
+        - index 0: payments per year based on frequency of payments
+        - index 1: factor based on number payment months / number of payments
+    '''
     payment_frequency = {
         "monthly":        (12, 12/12),
         "semi_monthly":   (24, 12/24),
@@ -49,6 +51,7 @@ class AmortizationService:
             amortization_years: int, 
             payment_frequency: str
             ):
+        
         '''
         Initialize core attributes for AmmortizationService
             - principal_start: the starting principal of the mortgage loan.
@@ -59,10 +62,11 @@ class AmortizationService:
             - monthly_anchor_payments: the amount paid for a frequency of monthly payments over your mortgage.
             - payment_frequency: tuple that holds two parts.
                 1) the payment frequency that was inputted by the user (i.e. monthly, semi-monthly, bi-weekly, etc.).
-                2) another tuple that holds in position 0 the number of payments in year and position 1 the ratio of months paid to payments made in that year.
+                2) another tuple that holds in position 0 the number of payments in a year and position 1 the ratio of months paid to payments made in that year.
             - min_payment_per_frequency: calculates the minimum payment amount required for the specific frequency provided by the user.
             - amortization_table: table of principal, interest, and a new principal balance after every payment at a set frequency.
         '''
+
         self.principal = principal_start
         self.interest_rate = interest_rate
         self.amortization_years = amortization_years
@@ -114,7 +118,7 @@ class AmortizationService:
 
     def _calculate_amortization_table(self, event_data=None):
         '''
-        Internal calculator to create table representing all payments over the mortage.
+        Internal calculator to create a table representing all payments over the mortage.
 
         This does take into account what your actual payments and interest rate are depending
         on what type of payment schedule you have selected (monthly, semi_monthly, weekly, acc_weekly, etc)
@@ -146,11 +150,17 @@ class AmortizationService:
             
             ## dynamic section to include block alterations
             if month in events:
+
                 block = events[month]
+                
+                # determine which type of event: Lump Sum, Rate Change or Payment Change
                 if block['type'] == "Lump Sum":
                     current_principal -= block['value']
+                    
                 elif block['type'] == "Rate Change":
                     current_annual_rate = block['value']
+
+                    # payment change involves recalculating the interest rate per payment
                     payment_interest_rate = self._calculate_interest_rate(
                         current_annual_rate,
                         self.payment_frequency[1][0]

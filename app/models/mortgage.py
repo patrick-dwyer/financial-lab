@@ -1,9 +1,9 @@
 class Mortgage:
     '''
-    Represents a mortgage that the user creates.
+    Represents a mortgage scenario that the user creates.
 
     This class determines:
-        - miniumum down payment required
+        - minimum down payment required
         - mortgage insurance
         - principal final (uninsured and insured)
 
@@ -24,30 +24,29 @@ class Mortgage:
 
     min_down_payment_percent_1 = 0.05 # percent of purchase price for minimum down payment below 500K CAD
     min_down_payment_percent_2 = 0.10 # percent of purchase price for down payment amount above 500K CAD
-    min_down_payment_percent_3 = 0.20 # percent of purchase price for down payment amount avoe 1.5M CAD
-
-
+    min_down_payment_percent_3 = 0.20 # percent of purchase price for down payment amount above 1.5M CAD
 
     def __init__(self, purchase_price: float, down_payment = None):
         '''
         Initializes the Mortgage object with Flask==3.1.3core attributes:
             - purchase_price: user input to create object. Price of real estate.
-            - min_down_payment: calculated minium down payment required based on purchase price.
+            - min_down_payment: calculated minimum down payment required based on purchase price.
             - down_payment: initial payment put against purchase price to reduce mortgage amount.
             - uninsured_principal: principal calculation without mortgage insurance (purchase_price - down_payment).
             - insured_principal: principal calculation with mortgage insurance (purchase_price - down_payment + mortgage_insurance).
         '''
-        print("init_runs")
-        self.purchase_price = purchase_price
-        self.min_down_payment = self._calculate_min_down_payment()
-        self.down_payment =  down_payment or self.min_down_payment
-        self.uninsured_principal = self.purchase_price - self.down_payment
-        self.insured_principal = self._calculate_mortgage_insurance()
+        
+        self.purchase_price = purchase_price # assign purchase price from user input
+        self.min_down_payment = self._calculate_min_down_payment() # calculate minimum down payment
+        self.down_payment =  down_payment or self.min_down_payment # User can input downpayment or default to minimum down payment
+        self.uninsured_principal = self.purchase_price - self.down_payment # calculated uninsured principal amount
+        self.insured_principal = self._calculate_mortgage_insurance() # calculated insured principal amount
 
+    # Getter and setter for down payment amount
     @property
     def down_payment(self):
         '''Getter: Returns the value when you call variable.down_payment'''
-        print("property runs")
+        
         return self._down_payment
     
     @down_payment.setter
@@ -58,13 +57,14 @@ class Mortgage:
             raise ValueError(f"Down payment {value} is below the legal minimum of {self.min_down_payment}")
         
         self._down_payment = value
-        print("setter runs")
         
         
 
     def _calculate_min_down_payment(self) -> float:
-        '''Internal helper to calculate minimum down payment based on purchase price.'''
-        print("calc_min_dp_runs")
+        '''Internal helper to calculate minimum down payment based on purchase price.
+        As of 2026, three tiers of rates are <500k, 500k-1.5M, >1.5M
+        '''
+        
         # Rule 1: purchase price at or above min_down_payment_cutoff_2
         if self.purchase_price >= Mortgage.min_down_payment_cutoff_2:
             return self.purchase_price * Mortgage.min_down_payment_percent_3
@@ -80,11 +80,11 @@ class Mortgage:
     
     def _calculate_mortgage_insurance(self) -> float:
         '''
-        Internal helper for mortgage insurance calculation.
+        Internal helper for mortgage insurance calculation. Dictionary is from table provided by
+        Canadian Mortgage and Housing Commission (CMHC) for loan to value premium based on down payment.
         '''
-        print("calc_mortg_ins")
 
-        # CMHC mortgage loan insurance table as a dictionary
+        # CMHC mortgage loan insurance table as a dictionary.
         loan_to_value_premium = {
             95: 0.040,
             90: 0.031,
@@ -117,10 +117,6 @@ class Mortgage:
         if count == 0:
             return (self.uninsured_principal * loan_to_value_premium[loan_to_value_premium_key_list[count]]) + self.uninsured_principal
         
-        # Condition 2: Find previous index to approprietly calculate loan_to_value_pct
+        # Condition 2: Find previous index to appropriately calculate loan_to_value_pct
         else:
             return (self.uninsured_principal * loan_to_value_premium[loan_to_value_premium_key_list[count-1]]) + self.uninsured_principal
-
-# # test case
-# my_mortgage = Mortgage(500000)
-# print(f"Purchase price: {my_mortgage.purchase_price}, Min down payment: {my_mortgage.min_down_payment}, Down payment: {my_mortgage.down_payment}, Uninsured principal: {my_mortgage.uninsured_principal}, Insured principal: {my_mortgage.insured_principal}")
