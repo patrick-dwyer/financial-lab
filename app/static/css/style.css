@@ -258,3 +258,22 @@ body {
     color: var(--text-dim);
     margin-bottom: 4px;
 }
+
+/* Highlights the specific empty/invalid input */
+.input-error {
+    border: 5px solid #e74c3c !important; /* A strong red */
+    background-color: rgb(250, 250, 247) !important;
+}
+
+/* The warning banner that appears at the top of the sidebar */
+.error-banner {
+    display: none;
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 0.9rem;
+}

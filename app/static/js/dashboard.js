@@ -2,6 +2,7 @@
 // - addScenario: add a new scenario to compare to existing scenarios
 // - checkScenarioLimit: helper function to limit max 5 scenarios on screen
 // - switchScenario: highlight  which scenario is currently selected on screen and show details of that scenario in sidebar
+// - validateInputs: helper function that looks at all user inputs and will flag anything that is wrong prior to calculations
 // - collectData: take user input details (base mortgage + any blocks) and send/receive data to/from Python backend
 // - addBlock: add a new block to the scenario to impact outcome of calculations
 // - sortBlocks: sort blocks for scenario based on month in descending order
@@ -119,7 +120,46 @@ function switchScenario(index) {
     }
 }
 
+
+function validateInputs() {
+// Validation of user input. Intended to run prior to calculation.
+
+    let isValid = true;
+    const errorBanner = document.getElementById('global-error');
+    
+    // Select all number inputs currently on the screen
+    const allInputs = document.querySelectorAll('.sidebar input[type="number"]');
+
+    // Reset everything first (remove old red borders and hide banner)
+    allInputs.forEach(input => input.classList.remove('input-error'));
+    errorBanner.style.display = 'none';
+
+    // Loop through and check for empty values
+    allInputs.forEach(input => {
+        if (input.value.trim() === '' || isNaN(input.value)) {
+            input.classList.add('input-error'); // Add the red border
+            isValid = false;
+        }
+    });
+
+    // If something was missing, show the message
+    if (!isValid) {
+        errorBanner.innerText = "Please fill out all highlighted fields with valid numbers.";
+        errorBanner.style.display = 'block';
+    }
+
+    return isValid; // Returns true if everything is good, false if not
+}
+
 function collectData() {
+
+    // Stop the function immediately if validation fails
+    if (!validateInputs()) {
+        console.warn("Calculation stopped: Missing inputs.");
+        return; 
+    }
+
+    console.log("All inputs valid, calculating...")
     
     // Loop through every scenario container
     const payload = scenarios.map((scenario, index) => {
