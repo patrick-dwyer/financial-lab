@@ -1,5 +1,6 @@
 // Dashboard javascript logic for mortgage lab. Includes the following functions:
 // - addScenario: add a new scenario to compare to existing scenarios
+// - checkScenarioLimit: helper function to limit max 5 scenarios on screen
 // - switchScenario: highlight  which scenario is currently selected on screen and show details of that scenario in sidebar
 // - collectData: take user input details (base mortgage + any blocks) and send/receive data to/from Python backend
 // - addBlock: add a new block to the scenario to impact outcome of calculations
@@ -7,11 +8,26 @@
 // - updateChart: ensure chart is updated with all scenarios plotted
 // - updateComparisonTable: update comparison table with all scenarios for their columns
 
+
+// Global variables
 let mortgageChart = null; // variable to hold the chart instance
 let scenarios = [{ id: 0 }]; // track active scenarios
 let activeScenarioIndex = 0; // default to scenario 1
-
 const max_scenarios = 5; // cap on scenarios to not overload the sidebar
+
+// Event listener for keystrokes that would break input for numbers
+document.addEventListener('keydown', function(event) {
+
+    // Check if the element being typed into is a number input
+    if (event.target.tagName === 'INPUT' && event.target.type === 'number') {
+        // Define the forbidden characters
+        const forbiddenKeys = ['e', 'E', '+', '-', ',', '$', '%'];
+        
+        if (forbiddenKeys.includes(event.key)) {
+            event.preventDefault(); // Stops the character from being typed
+        }
+    }
+});
 
 function addScenario() {
 
@@ -56,8 +72,9 @@ function addScenario() {
 
 }
 
-// Helper function to disable scenario button if max limit is reached (5 scenarios)
+
 function checkScenarioLimit() {
+// Helper function to disable scenario button if max limit is reached (5 scenarios)
     const addBtn = document.getElementById('add-scenario-btn') // find scenario button on page
 
     if (scenarios.length >= max_scenarios) {
