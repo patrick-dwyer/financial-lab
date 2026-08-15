@@ -11,21 +11,28 @@ let mortgageChart = null; // variable to hold the chart instance
 let scenarios = [{ id: 0 }]; // track active scenarios
 let activeScenarioIndex = 0; // default to scenario 1
 
+const max_scenarios = 5; // cap on scenarios to not overload the sidebar
+
 function addScenario() {
+
+    // Check if scenarios are maxed out before continuing
+    if (scenarios.length >= max_scenarios) {
+        return; // Exits function with no changes
+    }
 
     const newIndex = scenarios.length; // determine how many scenarios are present
     const currentContainer = document.getElementById(`scenario-${activeScenarioIndex}`); // find current scenario
     
-    // 1. Perform the clone
+    // Perform the clone
     const newContainer = currentContainer.cloneNode(true); // clone scneario with same features
     newContainer.id = `scenario-${newIndex}`; // provide new unique id number based on scenario number
     newContainer.style.display = 'none'; // hide it initially, do not force it to open
 
-    // 2. Manual sync value
+    // Manual sync value
     const currentInputs = currentContainer.querySelectorAll('input, select'); // copy input values as selected scneario
     const newInputs = newContainer.querySelectorAll('input, select'); // make list of all empty values of new scenario
     
-    // loop to replace all new values with current scenario values
+    // Loop to replace all new values with current scenario values
     currentInputs.forEach((input, i) => {
         newInputs[i].value = input.value;
     });
@@ -43,6 +50,28 @@ function addScenario() {
     tabsArea.insertBefore(tabBtn, tabsArea.lastElementChild); // place new scenario button to far right side
     
     scenarios.push({ id: newIndex }); //add new scenario to scenario list
+
+    // Check if we need to disable the scenario button for user
+    checkScenarioLimit()
+
+}
+
+// Helper function to disable scenario button if max limit is reached (5 scenarios)
+function checkScenarioLimit() {
+    const addBtn = document.getElementById('add-scenario-btn') // find scenario button on page
+
+    if (scenarios.length >= max_scenarios) {
+        addBtn.ariaDisabled = true // disable button from working
+        addBtn.style.opacity = '0.5'; // add styling to make it look different
+        addBtn.style.cursor = 'not-allowed'; // make cursor change shape
+        addBtn.title = "Maximum sceanrios reached." // text to display with cursor hover?
+    } else {
+        addBtn.ariaDisabled = false // enable button to work
+        addBtn.style.opacity = '1'; // add styling to make it look "normal"
+        addBtn.style.cursor = 'pointer'; // normal cursor when hovering over
+        addBtn.title = "Add new comparison scenario" // text to display with cursor hover?
+
+    }
 }
 
 function switchScenario(index) {
