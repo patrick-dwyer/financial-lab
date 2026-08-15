@@ -1,31 +1,56 @@
 // Dashboard javascript logic for mortgage lab. Includes the following functions:
 // - addScenario: add a new scenario to compare to existing scenarios
+// - checkScenarioLimit: helper function to limit max 5 scenarios on screen
 // - switchScenario: highlight  which scenario is currently selected on screen and show details of that scenario in sidebar
+// - validateInputs: helper function that looks at all user inputs and will flag anything that is wrong prior to calculations
 // - collectData: take user input details (base mortgage + any blocks) and send/receive data to/from Python backend
 // - addBlock: add a new block to the scenario to impact outcome of calculations
 // - sortBlocks: sort blocks for scenario based on month in descending order
 // - updateChart: ensure chart is updated with all scenarios plotted
 // - updateComparisonTable: update comparison table with all scenarios for their columns
+// - startTour: function to start the Intro.js tour
 
+
+// Global variables
 let mortgageChart = null; // variable to hold the chart instance
 let scenarios = [{ id: 0 }]; // track active scenarios
 let activeScenarioIndex = 0; // default to scenario 1
+const max_scenarios = 5; // cap on scenarios to not overload the sidebar
+
+// Event listener for keystrokes that would break input for numbers
+document.addEventListener('keydown', function(event) {
+
+    // Check if the element being typed into is a number input
+    if (event.target.tagName === 'INPUT' && event.target.type === 'number') {
+        // Define the forbidden characters
+        const forbiddenKeys = ['e', 'E', '+', '-', ',', '$', '%'];
+        
+        if (forbiddenKeys.includes(event.key)) {
+            event.preventDefault(); // Stops the character from being typed
+        }
+    }
+});
 
 function addScenario() {
+
+    // Check if scenarios are maxed out before continuing
+    if (scenarios.length >= max_scenarios) {
+        return; // Exits function with no changes
+    }
 
     const newIndex = scenarios.length; // determine how many scenarios are present
     const currentContainer = document.getElementById(`scenario-${activeScenarioIndex}`); // find current scenario
     
-    // 1. Perform the clone
+    // Perform the clone
     const newContainer = currentContainer.cloneNode(true); // clone scneario with same features
     newContainer.id = `scenario-${newIndex}`; // provide new unique id number based on scenario number
     newContainer.style.display = 'none'; // hide it initially, do not force it to open
 
-    // 2. Manual sync value
+    // Manual sync value
     const currentInputs = currentContainer.querySelectorAll('input, select'); // copy input values as selected scneario
     const newInputs = newContainer.querySelectorAll('input, select'); // make list of all empty values of new scenario
     
-    // loop to replace all new values with current scenario values
+    // Loop to replace all new values with current scenario values
     currentInputs.forEach((input, i) => {
         newInputs[i].value = input.value;
     });
@@ -43,6 +68,29 @@ function addScenario() {
     tabsArea.insertBefore(tabBtn, tabsArea.lastElementChild); // place new scenario button to far right side
     
     scenarios.push({ id: newIndex }); //add new scenario to scenario list
+
+    // Check if we need to disable the scenario button for user
+    checkScenarioLimit()
+
+}
+
+
+function checkScenarioLimit() {
+// Helper function to disable scenario button if max limit is reached (5 scenarios)
+    const addBtn = document.getElementById('add-scenario-btn') // find scenario button on page
+
+    if (scenarios.length >= max_scenarios) {
+        addBtn.ariaDisabled = true // disable button from working
+        addBtn.style.opacity = '0.5'; // add styling to make it look different
+        addBtn.style.cursor = 'not-allowed'; // make cursor change shape
+        addBtn.title = "Maximum sceanrios reached." // text to display with cursor hover?
+    } else {
+        addBtn.ariaDisabled = false // enable button to work
+        addBtn.style.opacity = '1'; // add styling to make it look "normal"
+        addBtn.style.cursor = 'pointer'; // normal cursor when hovering over
+        addBtn.title = "Add new comparison scenario" // text to display with cursor hover?
+
+    }
 }
 
 function switchScenario(index) {
@@ -73,7 +121,46 @@ function switchScenario(index) {
     }
 }
 
+
+function validateInputs() {
+// Validation of user input. Intended to run prior to calculation.
+
+    let isValid = true;
+    const errorBanner = document.getElementById('global-error');
+    
+    // Select all number inputs currently on the screen
+    const allInputs = document.querySelectorAll('.sidebar input[type="number"]');
+
+    // Reset everything first (remove old red borders and hide banner)
+    allInputs.forEach(input => input.classList.remove('input-error'));
+    errorBanner.style.display = 'none';
+
+    // Loop through and check for empty values
+    allInputs.forEach(input => {
+        if (input.value.trim() === '' || isNaN(input.value)) {
+            input.classList.add('input-error'); // Add the red border
+            isValid = false;
+        }
+    });
+
+    // If something was missing, show the message
+    if (!isValid) {
+        errorBanner.innerText = "Please fill out all highlighted fields with valid numbers.";
+        errorBanner.style.display = 'block';
+    }
+
+    return isValid; // Returns true if everything is good, false if not
+}
+
 function collectData() {
+
+    // Stop the function immediately if validation fails
+    if (!validateInputs()) {
+        console.warn("Calculation stopped: Missing inputs.");
+        return; 
+    }
+
+    console.log("All inputs valid, calculating...")
     
     // Loop through every scenario container
     const payload = scenarios.map((scenario, index) => {
@@ -284,3 +371,39 @@ function updateComparisonTable(scenarioResults) {
         tableBody.insertAdjacentHTML('beforeend', row);
     });
 }
+
+// Function to start the Intro.js tour
+function startTour() {
+    closeHelp(); // Ensure the modal is closed before starting
+    introJs().setOptions({
+        showProgress: true,
+        showBullets: false,
+        hidePrev: true,
+        theme: 'dark'
+    }).start();
+}
+
+// Modal Toggle Functions
+function openHelp() {
+    document.getElementById('help-modal').style.display = 'flex';
+}
+
+function closeHelp() {
+    document.getElementById('help-modal').style.display = 'none';
+}
+
+// The "Fatigue" Check: Run this when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if they have visited before
+    if (!localStorage.getItem('hasSeenTour')) {
+        // Ask them if they want a tour
+        const userWantsTour = confirm("Welcome to the Financial Lab! Would you like a quick tour of the features?");
+        
+        if (userWantsTour) {
+            startTour();
+        }
+        
+        // Save to localStorage so they are never asked again
+        localStorage.setItem('hasSeenTour', 'true');
+    }
+});
