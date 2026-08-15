@@ -277,3 +277,90 @@ body {
     text-align: center;
     font-size: 0.9rem;
 }
+
+/* Help Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 3000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    width: 500px;
+    max-width: 90%;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    color: var(--accent);
+}
+
+.close-btn {
+    background: transparent;
+    color: var(--text-dim);
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.close-btn:hover { color: white; }
+
+.modal-body p { margin-bottom: 15px; line-height: 1.5; }
+
+
+/* Sidebar Help Button */
+.help-icon-btn {
+    width: auto !important; /* Overrides the 100% width of standard sidebar buttons */
+    background: transparent !important;
+    color: var(--text-dim) !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    font-size: 0.8rem !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.help-icon-btn:hover {
+    color: var(--text-main) !important;
+    border-color: var(--text-dim) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Fix for Intro.js Tooltip Colors */
+.introjs-tooltip {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+.introjs-tooltiptext, 
+.introjs-tooltip-title {
+    color: #000000 !important;
+}
+
+/* Ensure the arrows match the white background */
+.introjs-arrow.top { border-bottom-color: #ffffff !important; }
+.introjs-arrow.bottom { border-top-color: #ffffff !important; }
+.introjs-arrow.left { border-right-color: #ffffff !important; }
+.introjs-arrow.right { border-left-color: #ffffff !important; }
+
+/* Clean up the intro.js buttons to look good on white */
+.introjs-button {
+    color: #333 !important;
+    text-shadow: none !important;
+}
