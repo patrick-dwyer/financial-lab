@@ -8,6 +8,7 @@
 // - sortBlocks: sort blocks for scenario based on month in descending order
 // - updateChart: ensure chart is updated with all scenarios plotted
 // - updateComparisonTable: update comparison table with all scenarios for their columns
+// - startTour: function to start the Intro.js tour
 
 
 // Global variables
@@ -370,3 +371,39 @@ function updateComparisonTable(scenarioResults) {
         tableBody.insertAdjacentHTML('beforeend', row);
     });
 }
+
+// Function to start the Intro.js tour
+function startTour() {
+    closeHelp(); // Ensure the modal is closed before starting
+    introJs().setOptions({
+        showProgress: true,
+        showBullets: false,
+        hidePrev: true,
+        theme: 'dark'
+    }).start();
+}
+
+// Modal Toggle Functions
+function openHelp() {
+    document.getElementById('help-modal').style.display = 'flex';
+}
+
+function closeHelp() {
+    document.getElementById('help-modal').style.display = 'none';
+}
+
+// The "Fatigue" Check: Run this when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if they have visited before
+    if (!localStorage.getItem('hasSeenTour')) {
+        // Ask them if they want a tour
+        const userWantsTour = confirm("Welcome to the Financial Lab! Would you like a quick tour of the features?");
+        
+        if (userWantsTour) {
+            startTour();
+        }
+        
+        // Save to localStorage so they are never asked again
+        localStorage.setItem('hasSeenTour', 'true');
+    }
+});
