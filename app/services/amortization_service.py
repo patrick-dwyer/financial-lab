@@ -1,3 +1,5 @@
+from asyncio import events
+
 import pandas as pd
 
 class AmortizationService:
@@ -130,7 +132,13 @@ class AmortizationService:
         payment_per_frequency = self.min_payment_per_frequency
 
         # catch any data from front end input blocks
-        events = {int(item['month']): item for item in (event_data or [])}
+        # Group events by month into lists to allow multiple events on the same date
+        events = {}
+        for item in (event_data or []):
+            m = int(item['month'])
+            if m not in events:
+                events[m] = []
+            events[m].append(item)
         
         # data frame to hold information from each monthly payment
         amortization_df = pd.DataFrame(
@@ -150,23 +158,22 @@ class AmortizationService:
             
             ## dynamic section to include block alterations
             if month in events:
-
-                block = events[month]
-                
-                # determine which type of event: Lump Sum, Rate Change or Payment Change
-                if block['type'] == "Lump Sum":
-                    current_principal -= block['value']
+                for block in events[month]:
                     
-                elif block['type'] == "Rate Change":
-                    current_annual_rate = block['value']
+                    # determine which type of event: Lump Sum, Rate Change or Payment Change
+                    if block['type'] == "Lump Sum":
+                        current_principal -= block['value']
+                        
+                    elif block['type'] == "Rate Change":
+                        current_annual_rate = block['value']
 
-                    # payment change involves recalculating the interest rate per payment
-                    payment_interest_rate = self._calculate_interest_rate(
-                        current_annual_rate,
-                        self.payment_frequency[1][0]
-                    )
-                elif block['type'] == "Payment Change":
-                    payment_per_frequency = block['value']
+                        # payment change involves recalculating the interest rate per payment
+                        payment_interest_rate = self._calculate_interest_rate(
+                            current_annual_rate,
+                            self.payment_frequency[1][0]
+                        )
+                    elif block['type'] == "Payment Change":
+                        payment_per_frequency = block['value']
 
             ## main loop logic for calculations
             # calculate interest owed
