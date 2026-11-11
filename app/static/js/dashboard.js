@@ -377,30 +377,44 @@ function updateComparisonTable(scenarioResults) {
 
     tableBody.innerHTML = ''; // clear old data
 
-    // look at each scenario loop
+    //1. Calculate total mortgage cost for each scenario
+    const scenarioCosts = scenarioResults.map(result => {
+        const initialPrincipal = result.visual_principal_list[0];
+        return initialPrincipal + result.total_interest;
+    });
+
+    //2. Determine the most expensive scenario to compare
+    const maxCost = Math.max(...scenarioCosts)
+
+    //3. Render rows
     scenarioResults.forEach((result, index) => {
-        
-        // Calculate variables
         const initialPrincipal = result.visual_principal_list[0];
         const totalInterest = result.total_interest;
         const totalCost = initialPrincipal + totalInterest;
-        
-        // convert months to years
+
+        //compare against most expensive. If most expensive, it will be 0
+        const totalSavings = maxCost - totalCost;
+
+        // Convert months to years & months
         const years = Math.floor(result.payoff_month / 12);
         const months = result.payoff_month % 12;
         const timeString = `${years}y ${months}m`;
 
-        // Check if this is the scenario currently selected in the sidebar
+        // Highlight active sidebar scenario
         const isActive = (index === activeScenarioIndex);
         const rowStyle = isActive ? 'background: #252525; border-left: 4px solid #2ecc71;' : '';
-        
-        // HTML injection to allow it to be highlighted when scenario selected
+
+        //highlight savings text
+        const savingsStyle = totalSavings > 0 ? 'color: #2ecc71; font-weight: bold;' : 'color: #bbb;';
+
+        // HTML to inject
         const row = `
-            <tr style="border-bottom: 1px solid #333; ${rowStyle}">
+           <tr style="border-bottom: 1px solid #333; ${rowStyle}">
                 <td style="padding: 15px; font-weight: bold;">Scenario ${index + 1}</td>
-                <td style="color: #ff6384;">$${totalInterest.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td style="color: #ff6384;">$${totalInterest.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 <td>${timeString}</td>
-                <td style="color: #2ecc71; font-weight: bold;">$${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td>$${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td style="${savingsStyle}">$${totalSavings.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             </tr>
         `;
         tableBody.insertAdjacentHTML('beforeend', row);
