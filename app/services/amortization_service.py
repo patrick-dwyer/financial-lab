@@ -243,7 +243,8 @@ class AmortizationService:
             "total_interest": total_interest,
             "payoff_month": payoff_month,
             "frequency_payment": payment_per_frequency,
-            "base_min_payment": self.min_payment_per_frequency
+            "base_min_payment": self.min_payment_per_frequency,
+            "monthly_min_payment": self.monthly_anchor_payments
         }
 
 

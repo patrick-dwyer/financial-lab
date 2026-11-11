@@ -122,7 +122,8 @@ function switchScenario(index) {
         // Update stats bar to match scenario picked.
         if (window.lastResults[index]) {
             const activeResult = window.lastResults[index];
-            document.getElementById('stat-min-payment').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
+            document.getElementById('stat-monthly-min').innerText = `$${activeResult.monthly_min_payment.toFixed(2)}`;
+            document.getElementById('stat-schedule-min').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
             document.getElementById('mortage-stats-bar').style.display = 'flex';
         }    
     }
@@ -244,7 +245,8 @@ function collectData() {
         updateComparisonTable(data.scenarios);
 
         const activeResult = data.scenarios[activeScenarioIndex];
-        document.getElementById('stat-min-payment').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
+        document.getElementById('stat-monthly-min').innerText = `$${activeResult.monthly_min_payment.toFixed(2)}`;
+        document.getElementById('stat-schedule-min').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
         document.getElementById('mortgage-stats-bar').style.display = 'flex';
     }
 })

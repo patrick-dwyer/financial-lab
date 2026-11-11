@@ -111,10 +111,15 @@
 
     <main class="results-area" data-step="3" data-title="Results Area" data-intro="This is the results area. It is broken into two parts: a visual and 'Sceanrio Cost Summary. You may need to scroll to look at the 'Sceanrio Cost Summary Table' depending on the size of your window.">
         <!-- Summary Stats Bar -->
-         <div id="mortgage-stats-bar" class="stats-bar" style="display:none;">
+         <div id="mortgage-stats-bar" class="stats-bar">
             <div class="stat-item">
-                <span class="stat-label">Min Required Payment:</span>
-                <span id="stat-min-payment" class="stat-value">$0.00</span>
+                <span class="stat-label">Min Monthly Payment:</span>
+                <span id="stat-monthly-min" class="stat-value">$0.00</span>
+            </div>
+            <div class="stat-item" style="border-left: 1px solid var(--border-color); padding-left: 20px;">
+                <span class="stat-label">Min Schedule Payment</span>
+                <span id="stat-schedule-min" class="stat-value">$0.00</span>
+
             </div>
          </div>
         
