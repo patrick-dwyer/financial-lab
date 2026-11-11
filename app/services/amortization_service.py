@@ -151,7 +151,25 @@ class AmortizationService:
             current_annual_rate,
             self.payment_frequency[1][0]
         )
-        
+
+        # Process month 0 event if user adds to blocks
+        if 0 in events:
+            for block in events[0]:
+                 # determine which type of event: Lump Sum, Rate Change or Payment Change
+                if block['type'] == "Lump Sum":
+                    current_principal -= block['value']
+                    
+                elif block['type'] == "Rate Change":
+                    current_annual_rate = block['value']
+
+                    # payment change involves recalculating the interest rate per payment
+                    payment_interest_rate = self._calculate_interest_rate(
+                        current_annual_rate,
+                        self.payment_frequency[1][0]
+                    )
+                elif block['type'] == "Payment Change":
+                    payment_per_frequency = block['value']
+
         # loop to calculate each payment to principal and interest
         total_steps = int(self.total_number_of_payments * (1/ self.payment_frequency[1][1]))
         for month in range(1, total_steps + 2):           
@@ -243,7 +261,8 @@ class AmortizationService:
             "total_interest": total_interest,
             "payoff_month": payoff_month,
             "frequency_payment": payment_per_frequency,
-            "base_min_payment": self.min_payment_per_frequency
+            "base_min_payment": self.min_payment_per_frequency,
+            "monthly_min_payment": self.monthly_anchor_payments
         }
 
 

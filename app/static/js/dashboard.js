@@ -122,7 +122,8 @@ function switchScenario(index) {
         // Update stats bar to match scenario picked.
         if (window.lastResults[index]) {
             const activeResult = window.lastResults[index];
-            document.getElementById('stat-min-payment').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
+            document.getElementById('stat-monthly-min').innerText = `$${activeResult.monthly_min_payment.toFixed(2)}`;
+            document.getElementById('stat-schedule-min').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
             document.getElementById('mortage-stats-bar').style.display = 'flex';
         }    
     }
@@ -244,7 +245,8 @@ function collectData() {
         updateComparisonTable(data.scenarios);
 
         const activeResult = data.scenarios[activeScenarioIndex];
-        document.getElementById('stat-min-payment').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
+        document.getElementById('stat-monthly-min').innerText = `$${activeResult.monthly_min_payment.toFixed(2)}`;
+        document.getElementById('stat-schedule-min').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
         document.getElementById('mortgage-stats-bar').style.display = 'flex';
     }
 })
@@ -329,17 +331,18 @@ function updateChart(scenarioResults) {
     const maxMonths = Math.max(...scenarioResults.map(s => s.visual_principal_list.length));
     const labels = Array.from({length: maxMonths}, (_, i) => i);
 
-    // 2. Define a set of colors for different scenarios
+    // 2. Define a set of colors for different scenarios. Picked for Okabe-Ito/Wong colorblind-safe palette
     const colors = [
-        { border: '#4bc0c0', bg: 'rgba(75, 192, 192, 0.1)' }, // Teal (S1)
-        { border: '#ff6384', bg: 'rgba(255, 99, 132, 0.1)' }, // Pink (S2)
-        { border: '#36a2eb', bg: 'rgba(54, 162, 235, 0.1)' }, // Blue (S3)
-        { border: '#ffce56', bg: 'rgba(255, 206, 86, 0.1)' }  // Yellow (S4)
+        { border: '#56B4E9', bg: 'rgba(75, 192, 192, 0.1)' }, // Sky Blue (S1)
+        { border: '#e69f00', bg: 'rgba(255, 99, 132, 0.1)' }, // Orange (S2)
+        { border: '#009e73', bg: 'rgba(54, 162, 235, 0.1)' }, // Bluish Green (S3)
+        { border: '#0072b2', bg: 'rgba(255, 206, 86, 0.1)' },  // Blue (S4)
+        { border: '#cc79a7', bg: 'rgba(255, 206, 86, 0.1)' }  // Reddish Purple (S5)'}
     ];
 
     // 3. Map the scenario results into Chart.js datasets
     const datasets = scenarioResults.map((result, index) => {
-        const color = colors[index % colors.length]; // Cycle colors if > 4 scenarios
+        const color = colors[index % colors.length]; // Cycle colors for scenario
         return {
             label: `Scenario ${index + 1}`,
             data: result.visual_principal_list,
@@ -360,11 +363,38 @@ function updateChart(scenarioResults) {
             maintainAspectRatio: false,
             scales: {
                 y: {
-                    beginAtZero: true,
-                    ticks: { callback: (value) => '$' + value.toLocaleString() },
-                    title: { display: true, text: 'Remaining Principal ($)' }
+                    beginAtZero: true, // start at 0
+                    min: 0, // anchors at 0
+                    ticks: { callback: (value) => '$' + value.toLocaleString() }, // y-value unit
+                    title: { display: true, text: 'Remaining Principal ($)' } // y-axis title
                 },
-                x: { title: { display: true, text: 'Month' } }
+                x: { 
+                    // type: 'time',
+                    title: { display: true, text: 'Timeline (Years & Months)' },
+                    ticks: {
+                        autoSkip: false, // stops Chart.js from picking random spots
+                        callback: function(value) {
+                            if (value % 12 === 0) {
+                                const year = value / 12;
+                                return [`Year ${year}`, `Month ${value}`]
+                            }
+                            return '';
+                        },
+                    }
+                }
+            }
+        },
+        plugins: {
+            // show when hovering this information
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItems) {
+                        const month = tooltipItems[0].dataIndex;
+                        const years = Math.floor(month / 12);
+                        const months = month % 12;
+                        return `Month ${month} (Year ${years}y ${months}m)`
+                    }
+                }
             }
         }
     });
@@ -377,30 +407,44 @@ function updateComparisonTable(scenarioResults) {
 
     tableBody.innerHTML = ''; // clear old data
 
-    // look at each scenario loop
+    //1. Calculate total mortgage cost for each scenario
+    const scenarioCosts = scenarioResults.map(result => {
+        const initialPrincipal = result.visual_principal_list[0];
+        return initialPrincipal + result.total_interest;
+    });
+
+    //2. Determine the most expensive scenario to compare
+    const maxCost = Math.max(...scenarioCosts)
+
+    //3. Render rows
     scenarioResults.forEach((result, index) => {
-        
-        // Calculate variables
         const initialPrincipal = result.visual_principal_list[0];
         const totalInterest = result.total_interest;
         const totalCost = initialPrincipal + totalInterest;
-        
-        // convert months to years
+
+        //compare against most expensive. If most expensive, it will be 0
+        const totalSavings = maxCost - totalCost;
+
+        // Convert months to years & months
         const years = Math.floor(result.payoff_month / 12);
         const months = result.payoff_month % 12;
         const timeString = `${years}y ${months}m`;
 
-        // Check if this is the scenario currently selected in the sidebar
+        // Highlight active sidebar scenario
         const isActive = (index === activeScenarioIndex);
         const rowStyle = isActive ? 'background: #252525; border-left: 4px solid #2ecc71;' : '';
-        
-        // HTML injection to allow it to be highlighted when scenario selected
+
+        //highlight savings text
+        const savingsStyle = totalSavings > 0 ? 'color: #2ecc71; font-weight: bold;' : 'color: #bbb;';
+
+        // HTML to inject
         const row = `
-            <tr style="border-bottom: 1px solid #333; ${rowStyle}">
+           <tr style="border-bottom: 1px solid #333; ${rowStyle}">
                 <td style="padding: 15px; font-weight: bold;">Scenario ${index + 1}</td>
-                <td style="color: #ff6384;">$${totalInterest.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td style="color: #ff6384;">$${totalInterest.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 <td>${timeString}</td>
-                <td style="color: #2ecc71; font-weight: bold;">$${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td>$${totalCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td style="${savingsStyle}">$${totalSavings.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             </tr>
         `;
         tableBody.insertAdjacentHTML('beforeend', row);
