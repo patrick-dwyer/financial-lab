@@ -84,6 +84,32 @@ body {
     gap: 30px;
 }
 
+.stats-bar {
+    display: flex;
+    gap: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.stat-value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--accent);
+}
+
 /* 4. COMPONENTS (Home Page Cards) */
 .tool-grid {
     display: grid;

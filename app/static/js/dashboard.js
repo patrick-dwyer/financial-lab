@@ -118,13 +118,20 @@ function switchScenario(index) {
     // refresh results to reflect user choice for highlight
     if (window.lastResults) {
         updateComparisonTable(window.lastResults);
+
+        // Update stats bar to match scenario picked.
+        if (window.lastResults[index]) {
+            const activeResult = window.lastResults[index];
+            document.getElementById('stat-min-payment').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
+            document.getElementById('mortage-stats-bar').style.display = 'flex';
+        }    
     }
 }
 
 
 function validateInputs() {
-// Validation of user input. Intended to run prior to calculation.
 
+    // Validation of user input. Intended to run prior to calculation.
     let isValid = true;
     const errorBanner = document.getElementById('global-error');
     
@@ -147,6 +154,30 @@ function validateInputs() {
     if (!isValid) {
         errorBanner.innerText = "Please fill out all highlighted fields with valid numbers.";
         errorBanner.style.display = 'block';
+    }
+
+    // Check if Payment Change blocks fall below the minimum payment 
+    if (window.lastResults && window.lastResults[activeScenarioIndex]) {
+        const minPayment = window.lastResults[activeScenarioIndex].base_min_payment;
+        const container = document.getElementById(`scenario-${activeScenarioIndex}`);
+        const blocks = container.getElementsByClassName('block');
+
+        for (let block of blocks) {
+            if (!block.classList.contains('base')) {
+                const title = block.querySelector('strong').innerText;
+                const amountInput = block.querySelector('.block-amount');
+
+                if (title === "Payment Change" && amountInput) {
+                    const enteredValue = parseFloat(amountInput.value)
+                    if (enteredValue < minPayment) {
+                        amountInput.classList.add('input-error')
+                        errorBanner.innerText = `Payment change is below the minimum amount based on your principal, interest rate, and amortization. Please input a number that is at or above your minimum payment number of $${minPayment.toFixed(2)}.`;
+                        errorBanner.style.display = 'block';
+                        return false;
+                    }
+                }
+            }
+        }
     }
 
     return isValid; // Returns true if everything is good, false if not
@@ -211,6 +242,10 @@ function collectData() {
         updateChart(data.scenarios);
         window.lastResults = data.scenarios; // Store results so we can refresh on tab switch
         updateComparisonTable(data.scenarios);
+
+        const activeResult = data.scenarios[activeScenarioIndex];
+        document.getElementById('stat-min-payment').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
+        document.getElementById('mortgage-stats-bar').style.display = 'flex';
     }
 })
     .catch(error => {

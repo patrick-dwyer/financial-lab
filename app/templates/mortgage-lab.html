@@ -15,7 +15,6 @@
             <h3>Feature Explanations</h3>
             <p><strong>+ Add:</strong> Button used to add scenarios. Can alter scenario inputs below. Refresh of page will reset back to one scenario.</p>
             <p><strong>Lump Sum:</strong> A one-time pre-payment applied directly to your principal balance.</p>
-            <p><strong>Payment Change:</strong> A permanent increase or decrease to your regular payment amount.</p>
             <p><strong>Payment Change:</strong> A permanent increase or decrease to your interest rate amount.</p>
             <p><strong>Calculate:</strong> Button used to implement changes to the tool.</p>
             <p><strong>Base Mortgage:</strong> The foundational terms of your loan (Principal, Rate, Amortization).</p>
@@ -30,6 +29,7 @@
 <div class="dashboard">
     <aside class="sidebar">
         <div class="sidebar-header">
+
             <!-- Title and Help Button Row -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h2 style="margin-bottom: 0;">Mortgage Lab</h2>
@@ -76,7 +76,7 @@
         </div>
             </div>
             
-        
+        <!-- Scenario Block Area -->
         <div id="scenario-wrapper" class="block-stack">
             <div id="scenario-0" class="scenario-container" data-step="6" data-title="Add inputs to lump sum." data-intro="This is where your scenario 'blocks' will appear when you click one. Let's add for your lump sum input 12 months and $20,000 for amount." >
                 <div class="block base" data-step="1" data-title="Mortgage Info: Start Here" data-intro="Let's start by inputing some mortgage information. You will need the Principal, Amortization (in years), Interest Rate, and Schedule. If you want, try out $500,000 Principal, 25 Years Ammortization, 5.0% Interest Rate, and Monthly Schedule. Once you have filled this in, click the 'Next' button for the next step.">
@@ -110,14 +110,20 @@
     </aside>
 
     <main class="results-area" data-step="3" data-title="Results Area" data-intro="This is the results area. It is broken into two parts: a visual and 'Sceanrio Cost Summary. You may need to scroll to look at the 'Sceanrio Cost Summary Table' depending on the size of your window.">
-        <div class="stats-row" id="base-stats">
-            <!-- <div class="stat-card">Base Payment Amount: <span id="base-frequency-payment-val">$0</span></div> -->
-        </div>
-
+        <!-- Summary Stats Bar -->
+         <div id="mortgage-stats-bar" class="stats-bar" style="display:none;">
+            <div class="stat-item">
+                <span class="stat-label">Min Required Payment:</span>
+                <span id="stat-min-payment" class="stat-value">$0.00</span>
+            </div>
+         </div>
+        
+         <!-- Main Chart Area -->
         <div class="chart-wrapper" data-step="8" data-title="Visual comparison of the two mortgages." data-intro="As you can see, the two mortgages are plotted together to give a visual comparison.">
             <canvas id="mortgageChart"></canvas>
         </div>
         
+        <!-- Comparison Area -->
         <div class="analysis-section" style="margin-top: 30px; background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid #333;" data-step="9" data-intro="This table represents a line item comparion for the sceanrios for 'total interest paid', 'time to payoff', and 'total lifetime cost'." data-title="Table Comparison">
             <h3 style="color: #2ecc71; margin-bottom: 20px;">Scenario Cost Summary</h3>
             <table style="width: 100%; border-collapse: collapse; text-align: left;">
