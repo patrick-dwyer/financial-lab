@@ -14,7 +14,7 @@ MarkupSafe==3.0.3
 meson==1.9.2
 numpy==2.2.6
 packaging==26.3
-pandas==3.0.1
+pandas==2.2.3
 pluggy==1.7.0
 Pygments==2.21.0
 pytest==9.2.0
