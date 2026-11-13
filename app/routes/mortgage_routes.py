@@ -27,22 +27,29 @@ def calculate_mortgage():
     scenarios_data = request.get_json() # This is now our list of {base: {}, events: []}
     results = []
 
-    # for loop to calculate each scenario
-    for item in scenarios_data:
+    try:
+        # for loop to calculate each scenario
+        for item in scenarios_data:
 
-        # Each 'item' contains its own base settings and its own event blocks
-        service = AmortizationService(
-            principal_start=item['base']['principal'],
-            amortization_years=item['base']['amortization'],
-            interest_rate=item['base']['interest'],
-            payment_frequency=item['base']['payment']
-        )
-        
-        # Calculate using the blocks specific to THIS scenario
-        res = service._calculate_amortization_table(event_data=item['events'])
-        results.append(res)
+            # Each 'item' contains its own base settings and its own event blocks
+            service = AmortizationService(
+                principal_start=item['base']['principal'],
+                amortization_years=item['base']['amortization'],
+                interest_rate=item['base']['interest'],
+                payment_frequency=item['base']['payment']
+            )
+            
+            # Calculate using the blocks specific to THIS scenario
+            res = service._calculate_amortization_table(event_data=item['events'])
+            results.append(res)
 
-    return jsonify({
-        "status": "success",
-        "scenarios": results # The list of dicts that updateChart() now expects
-    })
+        return jsonify({
+            "status": "success",
+            "scenarios": results # The list of dicts that updateChart() now expects
+        })
+    except ValueError as e:
+        # Catch the custom guardrail error and return it cleanly to the frontend
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 400

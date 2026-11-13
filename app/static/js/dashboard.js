@@ -235,21 +235,31 @@ function collectData() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
     })
-    .then(response => response.json()) // wait for response from python
-    .then(data => {
-    // with the data received, update chart and scenarios table
-    if (data.status === "success") {
-        // Pass the entire list of scenarios to the chart
-        updateChart(data.scenarios);
-        window.lastResults = data.scenarios; // Store results so we can refresh on tab switch
-        updateComparisonTable(data.scenarios);
+    .then(response => response.json().then(data => ({ status: response.status, body: data }))) // wait for response from python
+    .then(({ status, body }) => {
+        const errorBanner = document.getElementById('global-error');
 
-        const activeResult = data.scenarios[activeScenarioIndex];
+        // Check if Python returned a guardrail error or bad status
+        if (status !== 200 || body.status === "error") {
+            errorBanner.style.display = 'block';
+            errorBanner.innerText = body.message || "An error occurred during calculation.";
+            return;
+        }
+
+        // Clear any previous errors on successful calculation
+        errorBanner.style.display = 'none';
+        errorBanner.innerText = '';
+
+        // with the data received, update chart and scenarios table
+        updateChart(body.scenarios);
+        window.lastResults = body.scenarios; // Store results so we can refresh on tab switch
+        updateComparisonTable(body.scenarios);
+
+        const activeResult = body.scenarios[activeScenarioIndex];
         document.getElementById('stat-monthly-min').innerText = `$${activeResult.monthly_min_payment.toFixed(2)}`;
         document.getElementById('stat-schedule-min').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
         document.getElementById('mortgage-stats-bar').style.display = 'flex';
-    }
-})
+    })
     .catch(error => {
         console.error('Handshake failed:', error);
     });
