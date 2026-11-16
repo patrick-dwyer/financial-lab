@@ -212,3 +212,5 @@ __marimo__/
 
 #custom folders
 .drawio
+*.pyc
+test_env

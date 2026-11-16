@@ -21,6 +21,7 @@ class AmortizationService:
         __init__: initializes core attributes for the AmortizationService object.
         _calculate_interest__rate: calculate interest rate of each payment.
         _calculate_monthly_payment_anchor: calculate monthly payment amount.
+        _calculate_payments_for_remaining: calculates the required payment per frequency to fully amortize principal over remaining periods with new interest rate.
         _calculate_amortization_table: calculate base amortization table for mortgage.
 
     '''
@@ -69,6 +70,10 @@ class AmortizationService:
             - amortization_table: table of principal, interest, and a new principal balance after every payment at a set frequency.
         '''
 
+        # guard rail against too large of an interst rate input
+        if interest_rate > 2.0:  # e.g., capping at 200%
+            raise ValueError("Interest rate exceeds maximum allowable calculation threshold (200%).")
+
         self.principal = principal_start
         self.interest_rate = interest_rate
         self.amortization_years = amortization_years
@@ -116,7 +121,21 @@ class AmortizationService:
         discount_factor = 1 - (1 + self.monthly_anchor_interest_rate)**-(self.total_number_of_payments)
 
         # combinator of the two factors to determin the base monthly payments
-        return principal_interest / discount_factor   
+        return principal_interest / discount_factor
+
+    def _calculate_payment_for_remaining(self, princpal, periodic_rate, remaining_periods):
+        '''
+        Determine required payment frequency to fully pay off remaining principal over the remaining
+        periods at the new interest rate.
+        '''
+        if remaining_periods <= 0:
+            return princpal
+        if periodic_rate <=0:
+            return princpal / remaining_periods
+
+        numerator = princpal * periodic_rate
+        denominator = 1 - (1 + periodic_rate) ** -remaining_periods
+        return numerator / denominator
 
     def _calculate_amortization_table(self, event_data=None):
         '''
@@ -152,6 +171,9 @@ class AmortizationService:
             self.payment_frequency[1][0]
         )
 
+        #process month 0 event if user adds to blocks
+        total_steps = int(self.total_number_of_payments * (1/ self.payment_frequency[1][1]))
+
         # Process month 0 event if user adds to blocks
         if 0 in events:
             for block in events[0]:
@@ -160,6 +182,8 @@ class AmortizationService:
                     current_principal -= block['value']
                     
                 elif block['type'] == "Rate Change":
+                    if block['value'] > 2.0:
+                        raise ValueError(f"Rate change to {block['value']*100}% at month {month} exceeds the 200% max threshold.")
                     current_annual_rate = block['value']
 
                     # payment change involves recalculating the interest rate per payment
@@ -167,6 +191,14 @@ class AmortizationService:
                         current_annual_rate,
                         self.payment_frequency[1][0]
                     )
+
+                    # recalculate payment for the full remaining schedule (total steps)
+                    payment_per_frequency = self._calculate_payment_for_remaining(
+                        current_principal,
+                        payment_interest_rate,
+                        total_steps
+                    )
+
                 elif block['type'] == "Payment Change":
                     payment_per_frequency = block['value']
 
