@@ -1,5 +1,5 @@
 # financial-lab
-An application that helps to understand your current or prospective options when deciding on financial decisions.
+An application that helps simulate financial decisions to help you with decisions.
 
 Prospective projects include:
 - Rent vs Buy comparison: tool to compare renting versus purchasing.
