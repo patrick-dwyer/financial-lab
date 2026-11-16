@@ -73,6 +73,8 @@ class AmortizationService:
         # guard rail against too large of an interst rate input
         if interest_rate > 2.0:  # e.g., capping at 200%
             raise ValueError("Interest rate exceeds maximum allowable calculation threshold (200%).")
+        if principal_start <=0:
+            raise ValueError("Principal amount must be greater than zero.")
 
         self.principal = principal_start
         self.interest_rate = interest_rate

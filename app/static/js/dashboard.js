@@ -124,7 +124,7 @@ function switchScenario(index) {
             const activeResult = window.lastResults[index];
             document.getElementById('stat-monthly-min').innerText = `$${activeResult.monthly_min_payment.toFixed(2)}`;
             document.getElementById('stat-schedule-min').innerText = `$${activeResult.base_min_payment.toFixed(2)}`;
-            document.getElementById('mortage-stats-bar').style.display = 'flex';
+            document.getElementById('mortgage-stats-bar').style.display = 'flex';
         }    
     }
 }
@@ -155,6 +155,17 @@ function validateInputs() {
     if (!isValid) {
         errorBanner.innerText = "Please fill out all highlighted fields with valid numbers.";
         errorBanner.style.display = 'block';
+        return false
+    }
+
+    // Check for negative or zero principal
+    const activeContainer = document.getElementById(`scenario-${activeScenarioIndex}`);
+    const principalInput = activeContainer.querySelector('.base-principal');
+    if (principalInput && parseFloat(principalInput.value) <= 0) {
+        principalInput.classList.add('input-error');
+        errorBanner.innerText = "Principal amount must be greater than zero.";
+        errorBanner.style.display = 'block';
+        return false;
     }
 
     // Check if Payment Change blocks fall below the minimum payment 
@@ -197,7 +208,7 @@ function collectData() {
     // Loop through every scenario container
     const payload = scenarios.map((scenario, index) => {
         const container = document.getElementById(`scenario-${index}`); // make container for scenario
-        const blocks = Array.from(container.getElementsByClassName('block')); // create block arrray for each scenario
+        const blocks = Array.from(container.getElementsByClassName('block')); // create block array for each scenario
         
         let baseSettings = {}; // empty object for base
         const eventBlocks = []; // empty array for blocks
