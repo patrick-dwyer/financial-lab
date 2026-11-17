@@ -168,6 +168,15 @@ function validateInputs() {
         return false;
     }
 
+    // Check for interest rate > 200%
+    const interestInput = activeContainer.querySelector('.base-interest');
+    if (interestInput && parseFloat(interestInput.value) > 200) {
+        interestInput.classList.add('input-error');
+        errorBanner.innerText = "Interest rate cannot exceed 200%."
+        errorBanner.style.display = 'block'
+        return false
+    }
+
     // Check if Payment Change blocks fall below the minimum payment 
     if (window.lastResults && window.lastResults[activeScenarioIndex]) {
         const minPayment = window.lastResults[activeScenarioIndex].base_min_payment;
