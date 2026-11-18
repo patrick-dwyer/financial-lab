@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify
 from app.services.amortization_service import AmortizationService
+# import time
 
 # Create Blueprint so the main app knows these routes exist
 mortgage_routes = Blueprint('mortgage_routes', __name__)
@@ -26,6 +27,7 @@ def calculate_mortgage():
     '''
     scenarios_data = request.get_json() # This is now our list of {base: {}, events: []}
     results = []
+    # time.sleep(2) # test for calculation button
 
     try:
         # for loop to calculate each scenario

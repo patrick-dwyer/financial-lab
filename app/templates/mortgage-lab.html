@@ -26,7 +26,9 @@
         </div>
     </div>
 </div>
+
 <div class="dashboard">
+    <!-- Left dashboard -->
     <aside class="sidebar">
         <div class="sidebar-header">
 
@@ -47,34 +49,42 @@
                     onclick="addScenario()">➕ Add</button>       
             </div>
             
+            <!-- Lump Sum Button -->
             <button
                 data-step="5"
                 data-title="Lump Sum Payments"
                 data-intro="Inject a one-time lump sum to your mortgage. You can add as many as you'd like. Click '+ Lump Sum' button once and then click next to find where your block was created." 
                 onclick="addBlock('Lump Sum')">➕ Lump Sum</button>
+            
+            <!-- Alter Payment Button -->
             <button 
             data-step="11"    
             data-title="Alter your Payment Amount"
                 data-intro="This block allows you to change your payment amount for your specified frequency schedule. For example, you may be paying $2,000 a month and want to up this to $2,500 at 3 years (36 months) into your mortgage to pay more against your principle each payment."
                 onclick="addBlock('Payment Change')">➕ Payment Change</button>
+            
+            <!-- Rate Change Button -->
             <button 
                 data-step="12"
                 data-title="Rate Change"
                 data-intro="This will allow you to alter your interest rate at a specified time in your mortgage."
             onclick="addBlock('Rate Change')">➕ Rate Change</button>
+            
+            <!-- Calculate Button -->
             <div
                 data-title="Calculate Button"
                 data-intro="This is the button to click once you have completed your inputs. This will update the visual and calculations shown on the page. Let's click it to see what our base mortgage looks like." 
                 data-step="2">
                 
                 <button
+                    id="calculate-btn"
                     class="calc-btn"
                     data-step="7"
                     data-title="Calculate both scenarios"
                     data-intro="Now that we have S1 with a lump sum and S2 without a lump sum, let's compare the two by hitting calculate."
                     onclick="collectData()" >🚀 Calculate</button>
-        </div>
             </div>
+        </div>
             
         <!-- Scenario Block Area -->
         <div id="scenario-wrapper" class="block-stack">
