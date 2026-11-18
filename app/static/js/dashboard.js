@@ -213,6 +213,13 @@ function collectData() {
     }
 
     console.log("All inputs valid, calculating...")
+
+    // Turn on loading state
+    const calcBtn = document.getElementById('calculate-btn');
+    const originalBtnText = calcBtn.innerHTML;
+    calcBtn.disabled = true;
+    calcBtn.innerHTML = '🚀 Calculating...';
+    calcBtn.style.backgroundColor = '#3498db';
     
     // Loop through every scenario container
     const payload = scenarios.map((scenario, index) => {
@@ -257,6 +264,12 @@ function collectData() {
     })
     .then(response => response.json().then(data => ({ status: response.status, body: data }))) // wait for response from python
     .then(({ status, body }) => {
+
+        // Turn off loading state
+        calcBtn.disabled = false;
+        calcBtn.innerHTML = originalBtnText;
+        calcBtn.style.backgroundColor = '';
+
         const errorBanner = document.getElementById('global-error');
 
         // Check if Python returned a guardrail error or bad status
@@ -281,6 +294,11 @@ function collectData() {
         document.getElementById('mortgage-stats-bar').style.display = 'flex';
     })
     .catch(error => {
+        // Turn off loading state on error
+        calcBtn.disabled = false;
+        calcBtn.innerHTML = originalBtnText;
+        calcBtn.style.backgroundColor = '';
+
         console.error('Handshake failed:', error);
     });
     

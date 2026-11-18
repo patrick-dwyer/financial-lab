@@ -390,3 +390,67 @@ body {
     color: #333 !important;
     text-shadow: none !important;
 }
+
+/* Footer items */
+.app-footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+    color: #6c757d;
+    border-top: 1px solid #dee2e6;
+    margin-top: 3rem;
+}
+
+.app-footer a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.app-footer a:hover {
+    text-decoration: underline;
+}
+
+.github-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; /* Adds space between the icon and the text */
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.github-link:hover {
+    text-decoration: underline;
+}
+
+.github-icon {
+    vertical-align: text-bottom;
+}
+
+/* Hidden by default on large screens */
+.mobile-warning-banner {
+    display: none;
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 10px 15px;
+    text-align: center;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #ffeeba;
+}
+
+/* Show only on screens smaller than 768px (phones) */
+@media (max-width: 768px) {
+    .mobile-warning-banner {
+        display: block;
+        position: fixed;
+        top: var(--nav-height); /* Locks it right underneath your fixed top nav */
+        left: 0;
+        width: 100%;
+        z-index: 1999; /* Sits just below the nav (2000) but above everything else */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Adds a subtle drop shadow */
+    }
+
+    /* Pushes the rest of the page down so the banner doesn't cover your dashboard content */
+    .content-wrapper {
+        margin-top: calc(var(--nav-height) + 45px); 
+    }
+}
