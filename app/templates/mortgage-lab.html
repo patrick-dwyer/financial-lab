@@ -13,15 +13,15 @@
             <p>The intent of this web app is to help users compare mortgage scenarios. You can input information for a mortgage scenario and add change features as described below.</p>
 
             <h3>Feature Explanations</h3>
-            <p><strong>+ Add:</strong> Button used to add scenarios. Can alter scenario inputs below. Refresh of page will reset back to one scenario.</p>
+            <p><strong>+ Add:</strong> Button used to add scenarios. Refresh of the page will reset back to one scenario.</p>
             <p><strong>Lump Sum:</strong> A one-time pre-payment applied directly to your principal balance.</p>
             <p><strong>Payment Change:</strong> A permanent increase or decrease to your interest rate amount.</p>
             <p><strong>Calculate:</strong> Button used to implement changes to the tool.</p>
-            <p><strong>Base Mortgage:</strong> The foundational terms of your loan (Principal, Rate, Amortization).</p>
+            <p><strong>Base Mortgage:</strong> The foundational terms of your loan (Principal, Rate, Amortization, Schedule).</p>
             
             <hr style="margin: 20px 0; border-color: #333;">
             
-            <p>Need a visual guide? Let us walk you through the dashboard.</p>
+            <p>Need a visual guide? Let's walk through the dashboard.</p>
             <button onclick="startTour()" class="calc-btn" style="width: 100%;">🎬 Start Interactive Tour</button>
         </div>
     </div>
@@ -33,7 +33,7 @@
             <!-- Title and Help Button Row -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                 <h2 style="margin-bottom: 0;">Mortgage Lab</h2>
-                <button onclick="openHelp()" class="help-icon-btn" title="How to use this tool" data-step="12" data-intro="Hope you found this helpful! If you need to run through this again or want a refresher, click the help button for more information. Enjoy the tool!" data-title="End of Tour">❓ Help</button>
+                <button onclick="openHelp()" class="help-icon-btn" title="How to use this tool" data-step="13" data-intro="Hope you found this helpful! If you need to run through this again or want a refresher, click the help button for more information. Enjoy the tool!" data-title="End of Tour">❓ Help</button>
             </div>
             <div id="global-error" class="error-banner"></div>
             <div id="scenario-tabs" style="display: flex; gap: 5px; margin-bottom: 10px;">
@@ -50,17 +50,17 @@
             <button
                 data-step="5"
                 data-title="Lump Sum Payments"
-                data-intro="Inject a one-time lump sum to your mortgage. You can add as many as you'd like. After hitting the '+ Lump Sum' button once, click next to find where your block was created." 
+                data-intro="Inject a one-time lump sum to your mortgage. You can add as many as you'd like. Click '+ Lump Sum' button once and then click next to find where your block was created." 
                 onclick="addBlock('Lump Sum')">➕ Lump Sum</button>
             <button 
-            data-step="10"    
+            data-step="11"    
             data-title="Alter your Payment Amount"
                 data-intro="This block allows you to change your payment amount for your specified frequency schedule. For example, you may be paying $2,000 a month and want to up this to $2,500 at 3 years (36 months) into your mortgage to pay more against your principle each payment."
                 onclick="addBlock('Payment Change')">➕ Payment Change</button>
             <button 
-                data-step="11"
+                data-step="12"
                 data-title="Rate Change"
-                data-intro="Related generally when you renew your mortgage term. This will allow you to alter your interest rate at a specified time in your mortgage."
+                data-intro="This will allow you to alter your interest rate at a specified time in your mortgage."
             onclick="addBlock('Rate Change')">➕ Rate Change</button>
             <div
                 data-title="Calculate Button"
@@ -78,7 +78,7 @@
             
         <!-- Scenario Block Area -->
         <div id="scenario-wrapper" class="block-stack">
-            <div id="scenario-0" class="scenario-container" data-step="6" data-title="Add inputs to lump sum." data-intro="This is where your scenario 'blocks' will appear when you click one. Let's add for your lump sum input 12 months and $20,000 for amount." >
+            <div id="scenario-0" class="scenario-container" data-step="6" data-title="Add inputs to lump sum." data-intro="This is where your scenario 'blocks' will appear. You will need to scroll to see them. Add input values to your lump sum block of 12 for 'Month' and $20,000 for 'Amount'." >
                 <div class="block base" data-step="1" data-title="Mortgage Info: Start Here" data-intro="Let's start by inputing some mortgage information. You will need the Principal, Amortization (in years), Interest Rate, and Schedule. If you want, try out $500,000 Principal, 25 Years Ammortization, 5.0% Interest Rate, and Monthly Schedule. Once you have filled this in, click the 'Next' button for the next step.">
                     <strong>Base Mortgage</strong>
                     <div style="margin-top:10px;">
@@ -109,9 +109,9 @@
         </div>
     </aside>
 
-    <main class="results-area" data-step="3" data-title="Results Area" data-intro="This is the results area. It is broken into two parts: a visual and 'Sceanrio Cost Summary. You may need to scroll to look at the 'Sceanrio Cost Summary Table' depending on the size of your window.">
+    <main class="results-area" data-step="3" data-title="Results Area" data-intro="This is the results area. You can scroll to look at through this section to view stats related to your scenario.">
         <!-- Summary Stats Bar -->
-         <div id="mortgage-stats-bar" class="stats-bar">
+         <div id="mortgage-stats-bar" class="stats-bar" data-step="10" data-title="Minimum Monthly and Schedule Payment" data-intro="This section displays what your minimum monthly and minimum payment amount for the specific scenario you have selected.">
             <div class="stat-item">
                 <span class="stat-label">Min Monthly Payment:</span>
                 <span id="stat-monthly-min" class="stat-value">$0.00</span>
@@ -129,7 +129,7 @@
         </div>
         
         <!-- Comparison Area -->
-        <div class="analysis-section" style="margin-top: 30px; background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid #333;" data-step="9" data-intro="This table represents a line item comparion for the sceanrios for 'total interest paid', 'time to payoff', and 'total lifetime cost'." data-title="Table Comparison">
+        <div class="analysis-section" style="margin-top: 30px; background: #1a1a1a; padding: 25px; border-radius: 12px; border: 1px solid #333;" data-step="9" data-intro="This table represents a line item comparison for the scenarios." data-title="Table Comparison">
             <h3 style="color: #2ecc71; margin-bottom: 20px;">Scenario Cost Summary</h3>
             <table style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>
