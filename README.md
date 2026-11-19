@@ -134,7 +134,7 @@ Understanding mortgage terms and regulatory guidelines helps when configuring sc
 3. **Install dependencies:**
 
    ```
-   pip install flask pandas
+   pip install -r requirements.txt
    
    
    ```
