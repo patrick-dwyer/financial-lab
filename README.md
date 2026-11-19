@@ -40,7 +40,7 @@ Whether simulating upfront lump sums, term renewal interest rate adjustments, or
 
 ### 📈 Interactive Charting
 
-* **Zero-Anchored Y-Axis:** Locks the bottom of the principal axis to $\$0$ to maintain visual clarity and scale.
+* **Zero-Anchored Y-Axis:** Locks the bottom of the principal axis to $0 to maintain visual clarity and scale.
 
 * **Dual-Scale X-Axis:** Displays clean yearly milestones ($Year\ 0, Year\ 1, Year\ 2\dots$) on the timeline while allowing exact month tracking.
 
