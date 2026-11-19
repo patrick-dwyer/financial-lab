@@ -454,3 +454,31 @@ body {
         margin-top: calc(var(--nav-height) + 45px); 
     }
 }
+
+/* Give Intro.js highlighted targets breathing room below the fixed navbar */
+.introjs-showElement,
+.introjs-relativePosition {
+    scroll-margin-top: calc(var(--nav-height) + 20px);
+}
+
+/* Keep tooltips and overlays above dashboard elements, below top-nav */
+.introjs-overlay {
+    z-index: 1500 !important;
+}
+
+.introjs-helperLayer,
+.introjs-tooltipReferenceLayer {
+    z-index: 1600 !important;
+}
+
+/* Adjust for shorter viewports so tour steps have breathing room */
+@media (max-height: 750px) {
+    .chart-wrapper {
+        min-height: 320px;
+    }
+
+    .results-area {
+        padding: 20px;
+        gap: 16px;
+    }
+}

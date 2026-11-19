@@ -502,12 +502,54 @@ function updateComparisonTable(scenarioResults) {
 // Function to start the Intro.js tour
 function startTour() {
     closeHelp(); // Ensure the modal is closed before starting
-    introJs().setOptions({
+
+    const sidebar = document.querySelector('.sidebar');
+    const blockStack = document.querySelector('.block-stack');
+    const resultsArea = document.querySelector('.results-area');
+
+    const resetScroll = () => {
+    if (sidebar) sidebar.scrollTop = 0;
+    if (blockStack) sidebar.scrollTop = 0;
+    if (resultsArea) sidebar.scrollTop = 0;
+    window.scrollTo(0,0);
+    };
+
+    // reset scroll position
+    resetScroll();
+
+    const tour = introJs().setOptions({
         showProgress: true,
         showBullets: false,
         hidePrev: true,
-        theme: 'dark'
-    }).start();
+        theme: 'dark',
+        scrollToElement: false,
+        scrollPadding: 80
+    });
+    
+    tour.onafterchange(function(targetElement) {
+        if (!targetElement) return;
+
+        const sidebar = document.querySelector('.sidebar');
+        const resultsArea = document.querySelector('.results-area')
+
+        // if the step is inside the sidebar, keep top header visible when on early/non block step
+        if (sidebar && sidebar.container(targetElement)) {
+            const rect = targetElement.getBoundingClientRect();
+            const sidebarRect = sidebar.getBoundingClientRect();
+
+            // if element is below the visible sidebar area on a short screen, scroll it into view
+            if (rect.bottom > sidebarRect || rect.top < sidebarRect.top + 90) {
+                targetElement.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+            }
+        } else if (resultsArea && resultsArea.contains(targetElement)) {
+            targetElement.scrollIntoView({behavior: 'smooth', block: 'center'});
+        }
+    });
+
+    tour.onexit(resetScroll);
+    tour.oncomplete(resetScroll);
+    
+    tour.start();
 }
 
 // Modal Toggle Functions
