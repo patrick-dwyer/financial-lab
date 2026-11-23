@@ -317,16 +317,22 @@ function addBlock(type) {
     // default case of Lump Sum
     let label = "Amount:";
     let placeholder = "$";
+    let amountMin = "0";
+    let amountStep = "10000";
 
     // case if Rate Change
     if (type === "Rate Change") {
         label = "New Percent:";
         placeholder = "%";
+        amountMin = "0";
+        amountStep = "0.25";
 
     // case if Payment Change
     } else if (type === "Payment Change") {
         label = "Payment Amount:";
         placeholder = "$";
+        amountMin = "0";
+        amountStep = "500";
     }
     
     // HTML to inject. Includes div for block, sortBlocks() function
@@ -338,11 +344,11 @@ function addBlock(type) {
         </div>
         <div style="margin-top:10px;">
             <label>Month:</label>
-            <input type="number" class="block-month" placeholder="60" onchange="sortBlocks()" style="width:60px">
+            <input type="number" class="block-month" placeholder="60" onchange="sortBlocks()" style="width:60px" min="0" step="12">
         </div>
         <div style="margin-top:5px;">
             <label>${label}</label>
-            <input type="number" class="block-amount" placeholder="${placeholder}" style="width:80px">
+            <input type="number" class="block-amount" placeholder="${placeholder}" style="width:80px" min="${amountMin}" step="${amountStep}">
         </div>
     `;
     
